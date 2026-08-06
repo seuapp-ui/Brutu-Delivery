@@ -1,0 +1,1099 @@
+{
+  "restaurante": {
+    "nome": "Brutu's Delivery",
+    "slogan": "O sabor é bruto, a fome não tem chance!",
+    "logo": "icons/icon-512.png",
+    "bannerTexto": "COMBO ESQUADRÃO · a partir de R$ 63,90",
+    "bannerImagem": "img/promo/sorteio-dia-dos-pais.jpg",
+    "bannerImagemAlt": "Sorteio Dia dos Pais - Brutu's Delivery",
+    "whatsapp": "5516993319742",
+    "pix": {
+      "chave": "57202267888",
+      "tipo": "cpf",
+      "titular": "Ana Livia",
+      "cidade": "MORRO AGUDO"
+    },
+    "taxaEntrega": 5,
+    "pedidoMinimoEntrega": 0,
+    "tempoEstimado": "40-60 min",
+    "enderecoRetirada": "Diamantino Mauricio, 13 - Bairro Granvile",
+    "horario": {
+      "abre": "18:00",
+      "fecha": "23:30",
+      "diasFechado": []
+    }
+  },
+  "categorias": [
+    {
+      "id": "lancamentos",
+      "nome": "Lançamentos",
+      "icone": "🆕"
+    },
+    {
+      "id": "combos",
+      "nome": "Combos",
+      "icone": "🧾"
+    },
+    {
+      "id": "hamburgueres-gourmet",
+      "nome": "Hambúrgueres Gourmet",
+      "icone": "🍔"
+    },
+    {
+      "id": "especiais",
+      "nome": "Especiais Brutu's",
+      "icone": "🔥"
+    },
+    {
+      "id": "porcoes",
+      "nome": "Porções",
+      "icone": "🍟"
+    },
+    {
+      "id": "bebidas",
+      "nome": "Bebidas",
+      "icone": "🥤"
+    }
+  ],
+  "adicionaisDisponiveis": [
+    {
+      "id": "add-bacon",
+      "nome": "Bacon extra",
+      "preco": 8
+    },
+    {
+      "id": "add-cheddar",
+      "nome": "Cheddar extra",
+      "preco": 6
+    },
+    {
+      "id": "add-ovo",
+      "nome": "Ovo",
+      "preco": 3
+    },
+    {
+      "id": "add-cebola-caramelizada",
+      "nome": "Cebola caramelizada",
+      "preco": 4
+    },
+    {
+      "id": "add-hamburguer-extra",
+      "nome": "Hambúrguer extra (carne)",
+      "preco": 9
+    },
+    {
+      "id": "add-catupiry-porcao",
+      "nome": "Catupiry",
+      "preco": 6
+    },
+    {
+      "id": "add-cheddar-porcao",
+      "nome": "Cheddar",
+      "preco": 5
+    },
+    {
+      "id": "add-bacon-porcao",
+      "nome": "Bacon",
+      "preco": 7
+    },
+    {
+      "id": "add-calabresa-porcao",
+      "nome": "Calabresa",
+      "preco": 6
+    },
+    {
+      "id": "add-batata-frita",
+      "nome": "Batata frita",
+      "preco": 4.99
+    },
+    {
+      "id": "acomp-guarana",
+      "nome": "Guaraná Jaboti 200ml",
+      "preco": 0
+    },
+    {
+      "id": "acomp-suco",
+      "nome": "Suco Frupic 450ml (uva ou laranja)",
+      "preco": 0
+    }
+  ],
+  "produtos": [
+    {
+      "id": "l001",
+      "categoria": "lancamentos",
+      "nome": "Banheira de Cheddar Brutu's",
+      "descricao": "Pão macio, hambúrguer, fatia de cheddar, bacon e molho da casa, tudo mergulhado em uma banheira de cheddar.",
+      "foto": "img/produtos/banheira-cheddar-brutus.jpg",
+      "preco": 39.9,
+      "ingredientes": [
+        "Pão",
+        "Hambúrguer",
+        "Cheddar",
+        "Bacon",
+        "Molho da casa"
+      ],
+      "adicionais": [
+        "acomp-guarana",
+        "acomp-suco",
+        "add-batata-frita"
+      ],
+      "escolhaUnicaIds": [
+        "acomp-guarana",
+        "acomp-suco"
+      ],
+      "escolhaUnicaTitulo": "Escolha o acompanhamento (grátis, um ou outro)",
+      "destaque": true,
+      "lancamento": true
+    },
+    {
+      "id": "c001",
+      "categoria": "combos",
+      "nome": "Combo Esquadrão",
+      "descricao": "2 Brutu's Clássico (pão, hambúrguer artesanal, queijo, alface, tomate e molho da casa), 2 batatas fritas (200g) e 1 refrigerante 1L. Perfeito para dividir!",
+      "foto": "img/produtos/combo-esquadrao.jpg",
+      "preco": 63.9,
+      "ingredientes": [
+        "2x Brutu's Clássico",
+        "2x Batata frita 200g",
+        "Refrigerante 1L"
+      ],
+      "adicionais": [
+        "add-cheddar",
+        "add-hamburguer-extra"
+      ],
+      "destaque": false,
+      "qtdLanches": 2
+    },
+    {
+      "id": "c002",
+      "categoria": "combos",
+      "nome": "Combo Tropa Bruta",
+      "descricao": "3 Brutu's Clássico (pão, hambúrguer artesanal, queijo, alface, tomate e molho da casa), batata frita (200g) e 1 refrigerante 1,5L. Ideal para a galera!",
+      "foto": "img/produtos/combo-tropa-bruta.jpg",
+      "preco": 89.9,
+      "ingredientes": [
+        "3x Brutu's Clássico",
+        "Batata frita 200g",
+        "Refrigerante 1,5L"
+      ],
+      "adicionais": [
+        "add-cheddar",
+        "add-hamburguer-extra"
+      ],
+      "destaque": true,
+      "qtdLanches": 3
+    },
+    {
+      "id": "c003",
+      "categoria": "combos",
+      "nome": "Combo Família Brutu's",
+      "descricao": "4 Brutu's Clássico (pão, hambúrguer artesanal, queijo, alface, tomate e molho da casa), batata frita (200g) e 1 refrigerante 2L. O combo completo!",
+      "foto": "img/produtos/combo-familia-brutus.jpg",
+      "preco": 117.9,
+      "ingredientes": [
+        "4x Brutu's Clássico",
+        "Batata frita 200g",
+        "Refrigerante 2L"
+      ],
+      "adicionais": [
+        "add-cheddar",
+        "add-hamburguer-extra"
+      ],
+      "destaque": false,
+      "qtdLanches": 4
+    },
+    {
+      "id": "c004",
+      "categoria": "combos",
+      "nome": "Combo Premium Brutu's",
+      "descricao": "2 Brutu's Clássico (pão, hambúrguer artesanal, queijo, alface, tomate e molho da casa), batata com cheddar e bacon e 1 refrigerante Guaraná Antártica 1L.",
+      "foto": "img/produtos/combo-premium-brutus.jpg",
+      "preco": 74.9,
+      "ingredientes": [
+        "2x Brutu's Clássico",
+        "Batata com cheddar e bacon",
+        "Guaraná Antártica 1L"
+      ],
+      "adicionais": [
+        "add-cheddar",
+        "add-hamburguer-extra"
+      ],
+      "destaque": true,
+      "qtdLanches": 2
+    },
+    {
+      "id": "c005",
+      "categoria": "combos",
+      "nome": "Combo X Tudo Brutus",
+      "descricao": "Xtudo Brutus (pão, hambúrguer, salsicha, bacon, ovo, presunto, muçarela, catupiry, cheddar, alface, tomate e molho da casa), batata com cheddar e bacon e 1 refrigerante lata Coca ou Guaraná.",
+      "foto": "img/produtos/combo-brutal.jpg",
+      "preco": 59.9,
+      "ingredientes": [
+        "Pão",
+        "Hambúrguer",
+        "Salsicha",
+        "Bacon",
+        "Ovo",
+        "Presunto",
+        "Muçarela",
+        "Catupiry",
+        "Cheddar",
+        "Alface",
+        "Tomate",
+        "Molho da casa",
+        "Batata com cheddar e bacon",
+        "Refrigerante lata (Coca ou Guaraná)"
+      ],
+      "adicionais": [
+        "add-cheddar",
+        "add-hamburguer-extra"
+      ],
+      "destaque": true
+    },
+    {
+      "id": "g001",
+      "categoria": "hamburgueres-gourmet",
+      "nome": "Brutu's Clássico",
+      "descricao": "Pão, hambúrguer artesanal, queijo, alface, tomate e molho da casa.",
+      "foto": "img/produtos/brutus-classico.jpg",
+      "preco": 25.9,
+      "ingredientes": [
+        "Pão",
+        "Hambúrguer artesanal",
+        "Queijo",
+        "Alface",
+        "Tomate",
+        "Molho da casa"
+      ],
+      "adicionais": [
+        "add-bacon",
+        "add-cheddar",
+        "add-ovo",
+        "add-cebola-caramelizada",
+        "add-hamburguer-extra"
+      ],
+      "destaque": true
+    },
+    {
+      "id": "g002",
+      "categoria": "hamburgueres-gourmet",
+      "nome": "Brutu's Bacon",
+      "descricao": "Pão, hambúrguer, cheddar cremoso, bacon crocante e molho especial.",
+      "foto": "https://placehold.co/600x450/241c17/ffb703?text=Brutus+Bacon",
+      "preco": 30.9,
+      "ingredientes": [
+        "Pão",
+        "Hambúrguer",
+        "Cheddar cremoso",
+        "Bacon crocante",
+        "Molho especial"
+      ],
+      "adicionais": [
+        "add-bacon",
+        "add-cheddar",
+        "add-ovo",
+        "add-cebola-caramelizada",
+        "add-hamburguer-extra"
+      ],
+      "destaque": false
+    },
+    {
+      "id": "g003",
+      "categoria": "hamburgueres-gourmet",
+      "nome": "Brutu's Cheddar Duplo",
+      "descricao": "Dois hambúrgueres, muito cheddar, cebola caramelizada e bacon.",
+      "foto": "https://placehold.co/600x450/241c17/ffb703?text=Brutus+Cheddar+Duplo",
+      "preco": 35.9,
+      "ingredientes": [
+        "Pão",
+        "2x Hambúrguer",
+        "Cheddar",
+        "Cebola caramelizada",
+        "Bacon"
+      ],
+      "adicionais": [
+        "add-bacon",
+        "add-cheddar",
+        "add-ovo",
+        "add-cebola-caramelizada",
+        "add-hamburguer-extra"
+      ],
+      "destaque": false
+    },
+    {
+      "id": "g004",
+      "categoria": "hamburgueres-gourmet",
+      "nome": "Brutu's Supremo",
+      "descricao": "Dois hambúrgueres, queijo prato, cheddar, bacon, onion rings e barbecue.",
+      "foto": "img/produtos/brutus-supremo.jpg",
+      "preco": 38.9,
+      "ingredientes": [
+        "Pão",
+        "2x Hambúrguer",
+        "Queijo prato",
+        "Cheddar",
+        "Bacon",
+        "Onion rings",
+        "Molho barbecue"
+      ],
+      "adicionais": [
+        "add-bacon",
+        "add-cheddar",
+        "add-ovo",
+        "add-cebola-caramelizada",
+        "add-hamburguer-extra"
+      ],
+      "destaque": false
+    },
+    {
+      "id": "g005",
+      "categoria": "hamburgueres-gourmet",
+      "nome": "Brutu's Monster",
+      "descricao": "Três hambúrgueres, queijo, cheddar, bacon, alface, tomate, anel de cebola e molho Brutus.",
+      "foto": "img/produtos/brutus-monster.jpg",
+      "preco": 44.9,
+      "ingredientes": [
+        "Pão",
+        "3x Hambúrguer",
+        "Queijo",
+        "Cheddar",
+        "Bacon",
+        "Alface",
+        "Tomate",
+        "Anel de cebola",
+        "Molho Brutus"
+      ],
+      "adicionais": [
+        "add-bacon",
+        "add-cheddar",
+        "add-ovo",
+        "add-cebola-caramelizada",
+        "add-hamburguer-extra"
+      ],
+      "destaque": false
+    },
+    {
+      "id": "g006",
+      "categoria": "hamburgueres-gourmet",
+      "nome": "Brutu's Insano",
+      "descricao": "Quatro hambúrgueres, quatro fatias de queijo, bacon em dobro e molho especial.",
+      "foto": "img/produtos/brutus-insano.jpg",
+      "preco": 54.9,
+      "ingredientes": [
+        "Pão",
+        "4x Hambúrguer",
+        "4x Queijo",
+        "Bacon em dobro",
+        "Molho especial"
+      ],
+      "adicionais": [
+        "add-bacon",
+        "add-cheddar",
+        "add-ovo",
+        "add-cebola-caramelizada",
+        "add-hamburguer-extra"
+      ],
+      "destaque": true
+    },
+    {
+      "id": "g007",
+      "categoria": "hamburgueres-gourmet",
+      "nome": "Brutu's Raiz",
+      "descricao": "Hambúrguer, catupiry, ovo, presunto, alface, tomate e molho da casa.",
+      "foto": "https://placehold.co/600x450/241c17/ffb703?text=Brutus+Raiz",
+      "preco": 35.9,
+      "ingredientes": [
+        "Pão",
+        "Hambúrguer",
+        "Catupiry",
+        "Ovo",
+        "Presunto",
+        "Alface",
+        "Tomate",
+        "Molho da casa"
+      ],
+      "adicionais": [
+        "add-bacon",
+        "add-cheddar",
+        "add-ovo",
+        "add-cebola-caramelizada",
+        "add-hamburguer-extra"
+      ],
+      "destaque": false
+    },
+    {
+      "id": "g008",
+      "categoria": "hamburgueres-gourmet",
+      "nome": "X Burguer Brutus",
+      "descricao": "Pão, hambúrguer e queijo.",
+      "foto": "https://placehold.co/600x450/241c17/ffb703?text=X+Burguer",
+      "preco": 23.9,
+      "ingredientes": [
+        "Pão",
+        "Hambúrguer",
+        "Queijo"
+      ],
+      "adicionais": [
+        "add-bacon",
+        "add-cheddar",
+        "add-ovo",
+        "add-cebola-caramelizada",
+        "add-hamburguer-extra"
+      ],
+      "destaque": false
+    },
+    {
+      "id": "e001",
+      "categoria": "especiais",
+      "nome": "Duplo Burger Brutus",
+      "descricao": "Pão, 2 hambúrguer, bacon, 2 fatias de cheddar, molho da casa.",
+      "foto": "img/produtos/duplo-burger-brutus.jpg",
+      "preco": 39.9,
+      "ingredientes": [
+        "Pão",
+        "2x Hambúrguer",
+        "Bacon",
+        "2x Cheddar",
+        "Molho da casa"
+      ],
+      "adicionais": [
+        "add-bacon",
+        "add-cheddar",
+        "add-ovo",
+        "add-cebola-caramelizada",
+        "add-hamburguer-extra"
+      ],
+      "destaque": false
+    },
+    {
+      "id": "e002",
+      "categoria": "especiais",
+      "nome": "Pappy Burger",
+      "descricao": "Pão, hambúrguer, fatia de cheddar, bacon, catupiry, alface e tomate.",
+      "foto": "https://placehold.co/600x450/241c17/ffb703?text=Pappy+Burger",
+      "preco": 29.99,
+      "ingredientes": [
+        "Pão",
+        "Hambúrguer",
+        "Cheddar",
+        "Bacon",
+        "Catupiry",
+        "Alface",
+        "Tomate"
+      ],
+      "adicionais": [
+        "add-bacon",
+        "add-cheddar",
+        "add-ovo",
+        "add-cebola-caramelizada",
+        "add-hamburguer-extra"
+      ],
+      "destaque": false
+    },
+    {
+      "id": "e003",
+      "categoria": "especiais",
+      "nome": "Xtudo Brutus",
+      "descricao": "Pão, hambúrguer, salsicha, bacon, ovo, presunto, muçarela, catupiry, cheddar, alface, tomate e molho da casa.",
+      "foto": "img/produtos/xtudo-brutus.jpg",
+      "preco": 42.9,
+      "ingredientes": [
+        "Pão",
+        "Hambúrguer",
+        "Salsicha",
+        "Bacon",
+        "Ovo",
+        "Presunto",
+        "Muçarela",
+        "Catupiry",
+        "Cheddar",
+        "Alface",
+        "Tomate",
+        "Molho da casa"
+      ],
+      "adicionais": [
+        "add-bacon",
+        "add-cheddar",
+        "add-ovo",
+        "add-cebola-caramelizada",
+        "add-hamburguer-extra"
+      ],
+      "destaque": true
+    },
+    {
+      "id": "e004",
+      "categoria": "especiais",
+      "nome": "Brutus na Chapa",
+      "descricao": "Pão, salsicha, bacon, batata palha, molho da casa, ovo, presunto, muçarela, alface e tomate.",
+      "foto": "https://placehold.co/600x450/241c17/ffb703?text=Brutus+na+Chapa",
+      "preco": 27,
+      "ingredientes": [
+        "Pão",
+        "Salsicha",
+        "Bacon",
+        "Batata palha",
+        "Molho da casa",
+        "Ovo",
+        "Presunto",
+        "Muçarela",
+        "Alface",
+        "Tomate"
+      ],
+      "adicionais": [
+        "add-bacon",
+        "add-cheddar",
+        "add-ovo",
+        "add-cebola-caramelizada",
+        "add-hamburguer-extra"
+      ],
+      "destaque": false
+    },
+    {
+      "id": "e005",
+      "categoria": "especiais",
+      "nome": "Brutus Quente",
+      "descricao": "Pão, salsicha, bacon, calabresa, ovo, presunto, muçarela, catupiry, batata palha, tomate, alface, molho especial.",
+      "foto": "img/produtos/brutus-quente.jpg",
+      "preco": 36,
+      "ingredientes": [
+        "Pão",
+        "Salsicha",
+        "Bacon",
+        "Calabresa",
+        "Ovo",
+        "Presunto",
+        "Muçarela",
+        "Catupiry",
+        "Batata palha",
+        "Tomate",
+        "Alface",
+        "Molho especial"
+      ],
+      "adicionais": [
+        "add-bacon",
+        "add-cheddar",
+        "add-ovo",
+        "add-cebola-caramelizada",
+        "add-hamburguer-extra"
+      ],
+      "destaque": false
+    },
+    {
+      "id": "e006",
+      "categoria": "especiais",
+      "nome": "Bruto Power",
+      "descricao": "Pão, hambúrguer, bacon, muçarela, catupiry, cebola roxa, tomate, rúcula e molho da casa.",
+      "foto": "https://placehold.co/600x450/241c17/ffb703?text=Bruto+Power",
+      "preco": 27.99,
+      "ingredientes": [
+        "Pão",
+        "Hambúrguer",
+        "Bacon",
+        "Muçarela",
+        "Catupiry",
+        "Cebola roxa",
+        "Tomate",
+        "Rúcula",
+        "Molho da casa"
+      ],
+      "adicionais": [
+        "add-bacon",
+        "add-cheddar",
+        "add-ovo",
+        "add-cebola-caramelizada",
+        "add-hamburguer-extra"
+      ],
+      "destaque": false
+    },
+    {
+      "id": "p001",
+      "categoria": "porcoes",
+      "nome": "Batata Frita Tradicional 200g",
+      "descricao": "Porção de batata frita tradicional e crocante, 200g.",
+      "foto": "img/produtos/batata-tradicional-200g.jpg",
+      "preco": 12.9,
+      "ingredientes": [
+        "Batata frita 200g"
+      ],
+      "adicionais": [
+        "add-catupiry-porcao",
+        "add-cheddar-porcao",
+        "add-bacon-porcao",
+        "add-calabresa-porcao"
+      ],
+      "destaque": false
+    },
+    {
+      "id": "p002",
+      "categoria": "porcoes",
+      "nome": "Batata Frita Tradicional 400g",
+      "descricao": "Porção de batata frita tradicional e crocante, 400g.",
+      "foto": "img/produtos/batata-tradicional-400g.jpg",
+      "preco": 20.9,
+      "ingredientes": [
+        "Batata frita 400g"
+      ],
+      "adicionais": [
+        "add-catupiry-porcao",
+        "add-cheddar-porcao",
+        "add-bacon-porcao",
+        "add-calabresa-porcao"
+      ],
+      "destaque": false
+    },
+    {
+      "id": "p003",
+      "categoria": "porcoes",
+      "nome": "Batata Frita Tradicional 700g",
+      "descricao": "Porção de batata frita tradicional e crocante, 700g.",
+      "foto": "img/produtos/batata-tradicional-700g.jpg",
+      "preco": 35.9,
+      "ingredientes": [
+        "Batata frita 700g"
+      ],
+      "adicionais": [
+        "add-catupiry-porcao",
+        "add-cheddar-porcao",
+        "add-bacon-porcao",
+        "add-calabresa-porcao"
+      ],
+      "destaque": false
+    },
+    {
+      "id": "p004",
+      "categoria": "porcoes",
+      "nome": "Batata Cheddar e Bacon 400g",
+      "descricao": "Batata frita recheada com cheddar cremoso e bacon, 400g.",
+      "foto": "img/produtos/batata-cheddar-bacon-400g.jpg",
+      "preco": 35.9,
+      "ingredientes": [
+        "Batata frita 400g",
+        "Cheddar",
+        "Bacon"
+      ],
+      "adicionais": [
+        "add-catupiry-porcao",
+        "add-cheddar-porcao",
+        "add-bacon-porcao",
+        "add-calabresa-porcao"
+      ],
+      "destaque": true
+    },
+    {
+      "id": "p005",
+      "categoria": "porcoes",
+      "nome": "Batata Catupiry e Bacon 400g",
+      "descricao": "Batata frita recheada com catupiry cremoso e bacon, 400g.",
+      "foto": "img/produtos/batata-catupiry-bacon-400g.jpg",
+      "preco": 33.9,
+      "ingredientes": [
+        "Batata frita 400g",
+        "Catupiry",
+        "Bacon"
+      ],
+      "adicionais": [
+        "add-catupiry-porcao",
+        "add-cheddar-porcao",
+        "add-bacon-porcao",
+        "add-calabresa-porcao"
+      ],
+      "destaque": false
+    },
+    {
+      "id": "p006",
+      "categoria": "porcoes",
+      "nome": "Batata Fritas 700g Completa",
+      "descricao": "Batata, cheddar, bacon, calabresa e muçarela. A porção mais recheada da casa!",
+      "foto": "img/produtos/batata-700g-completa.jpg",
+      "preco": 62.9,
+      "ingredientes": [
+        "Batata frita 700g",
+        "Cheddar",
+        "Bacon",
+        "Calabresa",
+        "Muçarela"
+      ],
+      "adicionais": [
+        "add-catupiry-porcao",
+        "add-cheddar-porcao",
+        "add-bacon-porcao",
+        "add-calabresa-porcao"
+      ],
+      "destaque": true
+    },
+    {
+      "id": "b001",
+      "categoria": "bebidas",
+      "nome": "Coca-Cola Lata 350ml",
+      "descricao": "Coca-Cola Lata 350ml",
+      "foto": "img/produtos/coca-lata-350ml.jpg",
+      "preco": 6,
+      "ingredientes": [],
+      "adicionais": [],
+      "destaque": false
+    },
+    {
+      "id": "b002",
+      "categoria": "bebidas",
+      "nome": "Guaraná Antártica Lata 350ml",
+      "descricao": "Guaraná Antártica Lata 350ml",
+      "foto": "img/produtos/guarana-lata-350ml-branco.jpg",
+      "preco": 5,
+      "ingredientes": [],
+      "adicionais": [],
+      "destaque": false
+    },
+    {
+      "id": "b003",
+      "categoria": "bebidas",
+      "nome": "Fanta 600ml",
+      "descricao": "Fanta 600ml",
+      "foto": "img/produtos/fanta-600ml.jpg",
+      "preco": 7,
+      "ingredientes": [],
+      "adicionais": [],
+      "destaque": false
+    },
+    {
+      "id": "b004",
+      "categoria": "bebidas",
+      "nome": "Sprite 600ml",
+      "descricao": "Sprite 600ml",
+      "foto": "img/produtos/sprite-600ml.jpg",
+      "preco": 7,
+      "ingredientes": [],
+      "adicionais": [],
+      "destaque": false
+    },
+    {
+      "id": "b005",
+      "categoria": "bebidas",
+      "nome": "Coca-Cola 600ml",
+      "descricao": "Coca-Cola 600ml",
+      "foto": "img/produtos/coca-600ml-branco.jpg",
+      "preco": 8,
+      "ingredientes": [],
+      "adicionais": [],
+      "destaque": false
+    },
+    {
+      "id": "b013",
+      "categoria": "bebidas",
+      "nome": "Coca-Cola 600ml Zero",
+      "descricao": "Coca-Cola 600ml Zero",
+      "foto": "img/produtos/coca-600ml-branco.jpg",
+      "preco": 8,
+      "ingredientes": [],
+      "adicionais": [],
+      "destaque": false
+    },
+    {
+      "id": "b006",
+      "categoria": "bebidas",
+      "nome": "Guaraná Antártica 1L",
+      "descricao": "Guaraná Antártica 1L",
+      "foto": "img/produtos/guarana-1l.jpg",
+      "preco": 8,
+      "ingredientes": [],
+      "adicionais": [],
+      "destaque": false
+    },
+    {
+      "id": "b007",
+      "categoria": "bebidas",
+      "nome": "Refrigerante Jaboti 2L",
+      "descricao": "Refrigerante Jaboti 2L",
+      "foto": "img/produtos/jaboti-2l.jpg",
+      "preco": 9,
+      "ingredientes": [],
+      "adicionais": [],
+      "destaque": false
+    },
+    {
+      "id": "b008",
+      "categoria": "bebidas",
+      "nome": "Coca-Cola 2L",
+      "descricao": "Coca-Cola 2L",
+      "foto": "img/produtos/coca-2l-branco.jpg",
+      "preco": 14,
+      "ingredientes": [],
+      "adicionais": [],
+      "destaque": false
+    },
+    {
+      "id": "b014",
+      "categoria": "bebidas",
+      "nome": "Coca-Cola 1L Zero",
+      "descricao": "Coca-Cola 1L Zero",
+      "foto": "img/produtos/coca-1l-zero.jpg",
+      "preco": 10,
+      "ingredientes": [],
+      "adicionais": [],
+      "destaque": false
+    },
+    {
+      "id": "b009",
+      "categoria": "bebidas",
+      "nome": "Suco Frupic Uva 450ml",
+      "descricao": "Suco Frupic Uva 450ml",
+      "foto": "img/produtos/frupic.jpg",
+      "preco": 4,
+      "ingredientes": [],
+      "adicionais": [],
+      "destaque": false
+    },
+    {
+      "id": "b010",
+      "categoria": "bebidas",
+      "nome": "Suco Frupic Cítrus 450ml",
+      "descricao": "Suco Frupic Cítrus 450ml",
+      "foto": "img/produtos/frupic.jpg",
+      "preco": 4,
+      "ingredientes": [],
+      "adicionais": [],
+      "destaque": false
+    },
+    {
+      "id": "b011",
+      "categoria": "bebidas",
+      "nome": "Suco Frupic Laranja com Acerola 450ml",
+      "descricao": "Suco Frupic Laranja com Acerola 450ml",
+      "foto": "img/produtos/frupic.jpg",
+      "preco": 4,
+      "ingredientes": [],
+      "adicionais": [],
+      "destaque": false
+    },
+    {
+      "id": "b012",
+      "categoria": "bebidas",
+      "nome": "Água com Gás",
+      "descricao": "Água com Gás",
+      "foto": "img/produtos/agua-com-gas.jpg",
+      "preco": 4,
+      "ingredientes": [],
+      "adicionais": [],
+      "destaque": false
+    },
+    {
+      "id": "b015",
+      "categoria": "bebidas",
+      "nome": "Suco de Morango da Fruta 300ml",
+      "descricao": "Suco natural de morango, feito com frutas selecionadas, sem conservantes e sem corantes. 300ml.",
+      "foto": "img/produtos/suco-morango.jpg",
+      "preco": 5,
+      "ingredientes": [],
+      "adicionais": [],
+      "destaque": false
+    },
+    {
+      "id": "b016",
+      "categoria": "bebidas",
+      "nome": "Suco de Morango da Fruta 500ml",
+      "descricao": "Suco natural de morango, feito com frutas selecionadas, sem conservantes e sem corantes. 500ml.",
+      "foto": "img/produtos/suco-morango.jpg",
+      "preco": 8,
+      "ingredientes": [],
+      "adicionais": [],
+      "destaque": false
+    },
+    {
+      "id": "b017",
+      "categoria": "bebidas",
+      "nome": "Guaraná Jaboti 250ml",
+      "descricao": "Guaraná Jaboti 250ml",
+      "foto": "img/produtos/jaboti-250ml.jpg",
+      "preco": 3,
+      "ingredientes": [],
+      "adicionais": [],
+      "destaque": false
+    },
+    {
+      "id": "b018",
+      "categoria": "bebidas",
+      "nome": "Guaraná Mineiro Baby 250ml",
+      "descricao": "Guaraná Mineiro Baby 250ml",
+      "foto": "img/produtos/guarana-mineiro-baby-250ml.jpg",
+      "preco": 4,
+      "ingredientes": [],
+      "adicionais": [],
+      "destaque": false
+    },
+    {
+      "id": "b019",
+      "categoria": "bebidas",
+      "nome": "Coca-Cola 1L",
+      "descricao": "Coca-Cola 1L",
+      "foto": "img/produtos/coca-1l.jpg",
+      "preco": 10,
+      "ingredientes": [],
+      "adicionais": [],
+      "destaque": false
+    },
+    {
+      "id": "b020",
+      "categoria": "bebidas",
+      "nome": "Coca-Cola Lata Zero 350ml",
+      "descricao": "Coca-Cola Lata Zero 350ml",
+      "foto": "img/produtos/coca-zero-lata.jpg",
+      "preco": 6,
+      "ingredientes": [],
+      "adicionais": [],
+      "destaque": false
+    },
+    {
+      "id": "b021",
+      "categoria": "bebidas",
+      "nome": "Coca-Cola 2L Zero",
+      "descricao": "Coca-Cola 2L Zero",
+      "foto": "img/produtos/coca-zero-2l.jpg",
+      "preco": 14,
+      "ingredientes": [],
+      "adicionais": [],
+      "destaque": false
+    },
+    {
+      "id": "b022",
+      "categoria": "bebidas",
+      "nome": "Água sem Gás",
+      "descricao": "Água sem Gás",
+      "foto": "img/produtos/agua-sem-gas.jpg",
+      "preco": 2.5,
+      "ingredientes": [],
+      "adicionais": [],
+      "destaque": false
+    },
+    {
+      "id": "c006",
+      "categoria": "combos",
+      "nome": "Barca Brutu's",
+      "descricao": "1 Lanche Clássico, batata frita com cheddar e bacon e 1 Guaraná Mineiro Baby 250ml. A combinação perfeita para matar a sua fome!",
+      "foto": "img/produtos/barca-brutus.jpg",
+      "preco": 45.9,
+      "ingredientes": [
+        "1x Lanche Clássico",
+        "Batata frita com cheddar e bacon",
+        "1x Guaraná Mineiro Baby 250ml"
+      ],
+      "adicionais": [
+        "add-cheddar",
+        "add-hamburguer-extra"
+      ],
+      "destaque": true
+    },
+    {
+      "id": "l002",
+      "categoria": "lancamentos",
+      "nome": "Croc Catupiry Brutu's",
+      "descricao": "Pão, catupiry empanado, 2 fatias de cheddar, tomate, rúcula e molho da casa.",
+      "foto": "img/produtos/croc-catupiry-brutus.jpg",
+      "preco": 54.9,
+      "ingredientes": [
+        "Pão",
+        "Catupiry empanado",
+        "Cheddar (2 fatias)",
+        "Tomate",
+        "Rúcula",
+        "Molho da casa"
+      ],
+      "adicionais": [
+        "add-bacon",
+        "add-cheddar",
+        "add-ovo",
+        "add-cebola-caramelizada"
+      ],
+      "destaque": true,
+      "lancamento": true
+    },
+    {
+      "id": "l003",
+      "categoria": "lancamentos",
+      "nome": "Brutus Prime",
+      "descricao": "Pão, hambúrguer, muçarela, catupiry, cebola caramelizada, tomate e rúcula.",
+      "foto": "https://placehold.co/600x450/241c17/ffb703?text=Brutus+Prime",
+      "preco": 27.99,
+      "ingredientes": [
+        "Pão",
+        "Hambúrguer",
+        "Muçarela",
+        "Catupiry",
+        "Cebola caramelizada",
+        "Tomate",
+        "Rúcula"
+      ],
+      "adicionais": [
+        "add-bacon",
+        "add-cheddar",
+        "add-ovo"
+      ],
+      "destaque": true,
+      "lancamento": true
+    }
+  ],
+  "taxasEntrega": [
+    {
+      "id": "centro",
+      "nome": "Centro",
+      "valor": 5
+    },
+    {
+      "id": "ipe",
+      "nome": "Ipê",
+      "valor": 5
+    },
+    {
+      "id": "monte-cristo",
+      "nome": "Monte Cristo",
+      "valor": 5
+    },
+    {
+      "id": "jardim-da-silveira",
+      "nome": "Jardim da Silveira",
+      "valor": 5
+    },
+    {
+      "id": "sem-terra",
+      "nome": "Sem Terra",
+      "valor": 5
+    },
+    {
+      "id": "benedetti",
+      "nome": "Benedetti",
+      "valor": 6
+    },
+    {
+      "id": "morada-do-lago",
+      "nome": "Morada do Lago",
+      "valor": 8
+    },
+    {
+      "id": "lago-azul",
+      "nome": "Lago Azul",
+      "valor": 10
+    }
+  ],
+  "cupons": [
+    {
+      "id": "bemvindo10",
+      "codigo": "BEMVINDO10",
+      "tipo": "percentual",
+      "valor": 10,
+      "minimo": 40,
+      "ativo": true,
+      "usoMaximo": 0,
+      "usos": 0,
+      "descricao": "10% de desconto em pedidos a partir de R$ 40"
+    },
+    {
+      "id": "entrega5",
+      "codigo": "ENTREGA5",
+      "tipo": "fixo",
+      "valor": 5,
+      "minimo": 0,
+      "ativo": true,
+      "usoMaximo": 0,
+      "usos": 0,
+      "descricao": "R$ 5 de desconto na taxa de entrega / pedido"
+    }
+  ]
+}

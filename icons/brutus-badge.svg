@@ -1,0 +1,143 @@
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="38%" r="70%">
+      <stop offset="0%" stop-color="#241c14"/>
+      <stop offset="100%" stop-color="#120d09"/>
+    </radialGradient>
+    <linearGradient id="ring" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffb100"/>
+      <stop offset="55%" stop-color="#ff5a1f"/>
+      <stop offset="100%" stop-color="#d6480f"/>
+    </linearGradient>
+    <linearGradient id="cap" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#2a2a2a"/>
+      <stop offset="100%" stop-color="#111111"/>
+    </linearGradient>
+    <linearGradient id="skin" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f0b784"/>
+      <stop offset="100%" stop-color="#dc9c62"/>
+    </linearGradient>
+    <linearGradient id="body" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#2b2b2b"/>
+      <stop offset="100%" stop-color="#0c0c0c"/>
+    </linearGradient>
+    <linearGradient id="ribbon" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffb100"/>
+      <stop offset="100%" stop-color="#ff5a1f"/>
+    </linearGradient>
+    <linearGradient id="bun" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f0a94d"/>
+      <stop offset="100%" stop-color="#d4841f"/>
+    </linearGradient>
+    <filter id="dropShadow" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000" flood-opacity="0.5"/>
+    </filter>
+  </defs>
+
+  <!-- Outer glow ring -->
+  <circle cx="256" cy="248" r="228" fill="url(#ring)"/>
+  <circle cx="256" cy="248" r="228" fill="none" stroke="#1a1008" stroke-width="4" opacity="0.5"/>
+  <circle cx="256" cy="248" r="207" fill="#100b07"/>
+  <circle cx="256" cy="248" r="205" fill="url(#bg)"/>
+  <circle cx="256" cy="248" r="205" fill="none" stroke="#ffb100" stroke-width="2" opacity="0.35"/>
+  <!-- inner dashed accent ring -->
+  <circle cx="256" cy="248" r="188" fill="none" stroke="#ff5a1f" stroke-width="1.5" stroke-dasharray="3 6" opacity="0.5"/>
+
+  <!-- Stars -->
+  <g fill="#ffb100">
+    <path d="M256 60 l7 15 16 2 -12 11 3 16 -14 -8 -14 8 3 -16 -12 -11 16 -2 z"/>
+    <path d="M188 74 l5.5 12 13 2 -9.5 9 2.5 13 -11.5 -6.5 -11.5 6.5 2.5 -13 -9.5 -9 13 -2 z"/>
+    <path d="M324 74 l5.5 12 13 2 -9.5 9 2.5 13 -11.5 -6.5 -11.5 6.5 2.5 -13 -9.5 -9 13 -2 z"/>
+    <path d="M130 104 l4.5 10 11 1.5 -8 7.5 2 11 -9.5 -5.5 -9.5 5.5 2 -11 -8 -7.5 11 -1.5 z"/>
+    <path d="M382 104 l4.5 10 11 1.5 -8 7.5 2 11 -9.5 -5.5 -9.5 5.5 2 -11 -8 -7.5 11 -1.5 z"/>
+  </g>
+
+  <!-- ===== Shoulders / body ===== -->
+  <ellipse cx="256" cy="400" rx="150" ry="90" fill="url(#body)"/>
+  <ellipse cx="150" cy="368" rx="62" ry="52" fill="url(#body)"/>
+  <ellipse cx="366" cy="368" rx="62" ry="52" fill="url(#body)"/>
+  <!-- muscle shading highlights -->
+  <ellipse cx="150" cy="352" rx="30" ry="18" fill="#3a3a3a" opacity="0.5"/>
+  <ellipse cx="366" cy="352" rx="30" ry="18" fill="#3a3a3a" opacity="0.5"/>
+
+  <!-- ===== Left arm flexed holding sandwich ===== -->
+  <g>
+    <path d="M118 330 Q78 300 92 258 Q104 226 140 226 Q172 228 178 262 Q182 292 158 316 Q138 334 118 330 Z" fill="url(#skin)"/>
+    <path d="M118 330 Q100 322 92 300" stroke="#c07d3f" stroke-width="4" fill="none" opacity="0.5" stroke-linecap="round"/>
+    <!-- fist -->
+    <ellipse cx="122" cy="238" rx="30" ry="26" fill="url(#skin)"/>
+    <path d="M100 228 q10 -8 20 0 M108 220 q10 -8 20 0 M116 214 q10 -8 20 0" stroke="#c07d3f" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.6"/>
+  </g>
+
+  <!-- Sandwich -->
+  <g transform="translate(78,182) rotate(-18)">
+    <path d="M0 26 Q18 4 46 8 Q66 12 64 30 Q60 46 36 48 Q10 48 0 34 Q-4 30 0 26 Z" fill="url(#bun)"/>
+    <path d="M2 24 Q10 12 24 8" stroke="#e8c07a" stroke-width="3" fill="none" opacity="0.7" stroke-linecap="round"/>
+    <path d="M4 20 Q22 8 42 12" stroke="#8fae3d" stroke-width="6" fill="none" stroke-linecap="round"/>
+    <path d="M4 28 Q24 22 46 25" stroke="#c0392b" stroke-width="5" fill="none" stroke-linecap="round"/>
+    <path d="M6 34 Q26 32 48 33" stroke="#7a4a24" stroke-width="5" fill="none" stroke-linecap="round"/>
+    <path d="M0 26 Q-4 40 14 46 Q30 50 44 44" fill="none" stroke="#b96c1f" stroke-width="3" opacity="0.6"/>
+  </g>
+
+  <!-- ===== Head ===== -->
+  <g filter="url(#dropShadow)">
+    <!-- ears -->
+    <circle cx="178" cy="220" r="17" fill="url(#skin)"/>
+    <circle cx="334" cy="220" r="17" fill="url(#skin)"/>
+    <circle cx="178" cy="220" r="8" fill="#c07d3f" opacity="0.5"/>
+    <circle cx="334" cy="220" r="8" fill="#c07d3f" opacity="0.5"/>
+
+    <!-- face base -->
+    <ellipse cx="256" cy="212" rx="84" ry="76" fill="url(#skin)"/>
+    <!-- cheek shading -->
+    <ellipse cx="205" cy="235" rx="16" ry="12" fill="#e8935a" opacity="0.4"/>
+    <ellipse cx="307" cy="235" rx="16" ry="12" fill="#e8935a" opacity="0.4"/>
+
+    <!-- eyebrows -->
+    <path d="M207 178 Q226 164 248 176" stroke="#2c1c10" stroke-width="9" fill="none" stroke-linecap="round"/>
+    <path d="M264 176 Q286 164 305 178" stroke="#2c1c10" stroke-width="9" fill="none" stroke-linecap="round"/>
+
+    <!-- eyes -->
+    <ellipse cx="224" cy="198" rx="9" ry="10" fill="#1a1005"/>
+    <ellipse cx="288" cy="198" rx="9" ry="10" fill="#1a1005"/>
+    <circle cx="227" cy="194" r="3" fill="#fff"/>
+    <circle cx="291" cy="194" r="3" fill="#fff"/>
+
+    <!-- nose -->
+    <path d="M250 202 Q240 228 253 234 Q266 228 262 202" fill="#dc9c62" stroke="#c07d3f" stroke-width="2" stroke-linejoin="round"/>
+
+    <!-- moustache -->
+    <path d="M196 240 Q220 220 256 234 Q292 220 316 240 Q302 254 280 248 Q266 260 256 246 Q246 260 232 248 Q210 254 196 240 Z" fill="#241a10"/>
+
+    <!-- smile -->
+    <path d="M216 258 Q256 292 296 258 Q256 278 216 258 Z" fill="#fff"/>
+    <path d="M216 258 Q256 284 296 258" stroke="#1a1005" stroke-width="4" fill="none" stroke-linecap="round"/>
+
+    <!-- chin -->
+    <ellipse cx="256" cy="272" rx="38" ry="16" fill="url(#skin)"/>
+    <path d="M240 280 Q256 286 272 280" stroke="#c07d3f" stroke-width="2.5" fill="none" opacity="0.5" stroke-linecap="round"/>
+  </g>
+
+  <!-- ===== Cap ===== -->
+  <g>
+    <path d="M172 168 Q256 96 340 168 Q340 190 256 192 Q172 190 172 168 Z" fill="url(#cap)"/>
+    <path d="M256 96 Q305 100 334 140 Q352 150 364 142 Q354 124 328 108 Q294 90 256 96 Z" fill="#050505"/>
+    <path d="M172 168 Q256 190 340 168" stroke="#000" stroke-width="3" fill="none" opacity="0.4"/>
+    <circle cx="256" cy="104" r="8" fill="#ffb100"/>
+    <path d="M215 130 Q256 112 297 130" stroke="#ff5a1f" stroke-width="4" fill="none" stroke-linecap="round" opacity="0.85"/>
+  </g>
+
+  <!-- ===== Ribbon banner ===== -->
+  <g filter="url(#dropShadow)">
+    <path d="M50 380 L128 380 L146 414 L128 448 L50 448 L68 414 Z" fill="url(#ribbon)"/>
+    <path d="M462 380 L384 380 L366 414 L384 448 L462 448 L444 414 Z" fill="url(#ribbon)"/>
+    <rect x="92" y="374" width="328" height="80" rx="8" fill="url(#ribbon)"/>
+    <rect x="92" y="374" width="328" height="80" rx="8" fill="none" stroke="#a83d0a" stroke-width="2" opacity="0.35"/>
+    <!-- fold shadows -->
+    <path d="M68 414 L92 405 L92 423 Z" fill="#a83d0a" opacity="0.5"/>
+    <path d="M444 414 L420 405 L420 423 Z" fill="#a83d0a" opacity="0.5"/>
+  </g>
+
+  <text x="256" y="418" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="40" fill="#1a1008" letter-spacing="1">BRUTU'S</text>
+  <text x="256" y="442" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="15" fill="#1a1008" letter-spacing="5">DELIVERY</text>
+</svg>

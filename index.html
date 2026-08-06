@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Brutu's Delivery — Cardápio</title>
+<meta name="description" content="Peça pelo cardápio digital do Brutu's Delivery e receba tudo quentinho em casa.">
+<meta name="theme-color" content="#14100d">
+
+<!-- Preview do link (aparece quando o link é colado no WhatsApp, Instagram etc.)
+     IMPORTANTE: og:image precisa ser uma URL ABSOLUTA quando o site estiver
+     hospedado (ex: https://seudominio.com/icons/og-image.png), senão o
+     WhatsApp não consegue buscar a imagem. Troque a linha abaixo depois de
+     publicar o site — veja o README. -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Brutu's Delivery — Cardápio">
+<meta property="og:description" content="Peça pelo cardápio digital do Brutu's Delivery e receba tudo quentinho em casa.">
+<meta property="og:image" content="icons/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Brutu's Delivery — Cardápio">
+<meta name="twitter:description" content="Peça pelo cardápio digital do Brutu's Delivery e receba tudo quentinho em casa.">
+<meta name="twitter:image" content="icons/og-image.png">
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Work+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="css/style.css">
+
+<!-- Configuração central da marca/tema (ver data/site-config.js) -->
+<script src="data/site-config.js"></script>
+<script>
+  (function () {
+    try {
+      var t = window.SITE_CONFIG && window.SITE_CONFIG.tema;
+      if (!t) return;
+      var root = document.documentElement.style;
+      if (t.accent) root.setProperty("--accent", t.accent);
+      if (t.accentDark) root.setProperty("--accent-dark", t.accentDark);
+      if (t.ember) root.setProperty("--ember", t.ember);
+    } catch (e) { /* se der qualquer erro, mantém as cores padrão do CSS */ }
+  })();
+</script>
+<link rel="stylesheet" href="css/roleta.css">
+</head>
+<body>
+
+<a href="#main-content" class="skip-link">Pular para o conteúdo</a>
+
+<div id="offline-indicator" class="offline-banner hidden" role="status">
+  Sem conexão — mostrando o último cardápio salvo
+</div>
+
+<!-- ======================= TELA DE CARREGAMENTO ======================= -->
+<div id="loading-screen" class="loading-screen">
+  <div class="selo loading-selo" aria-hidden="true">B</div>
+  <p style="color:var(--text-dim); font-size:14px;">Preparando o cardápio…</p>
+</div>
+
+<!-- ======================= APP (preenchido via JS) ======================= -->
+<div id="app" class="hidden">
+
+  <!-- ---------- Cabeçalho ---------- -->
+  <header class="app-header">
+    <div class="header-top">
+      <div class="logo-selo selo" aria-hidden="true">
+        <img id="restaurante-logo" src="" alt="">
+      </div>
+      <div class="brand-block">
+        <h1 class="brand-name" id="restaurante-nome">Brutu's Delivery</h1>
+        <div class="brand-meta">
+          <span id="restaurante-status" class="status-aberto">Aberto agora</span>
+          <span class="dot">•</span>
+          <span id="restaurante-tempo">40-60 min</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="search-wrap">
+      <div class="search-box">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="search" id="busca-input" placeholder="Buscar no cardápio (ex: bacon, coca...)" aria-label="Buscar produto">
+      </div>
+    </div>
+  </header>
+
+  <!-- ---------- Categorias (sticky) ---------- -->
+  <nav class="category-nav" aria-label="Categorias do cardápio">
+    <div class="category-scroll" id="categoria-nav-scroll"></div>
+  </nav>
+
+  <!-- ---------- Conteúdo principal ---------- -->
+  <main id="main-content">
+    <div class="hero-banner" id="banner-wrap">
+      <div class="hero-glow" aria-hidden="true"></div>
+      <img class="hero-mascot" id="hero-mascot" src="" alt="">
+      <div class="hero-text">
+        <h2 class="hero-title" id="hero-title">Brutu's Delivery</h2>
+        <p class="hero-slogan" id="hero-slogan"></p>
+        <span class="banner-tag" id="banner-tag"></span>
+      </div>
+      <img class="hero-banner-promo hidden" id="hero-banner-promo" src="" alt="">
+    </div>
+
+    <section class="destaques-section hidden" id="destaques-section">
+      <h2 class="section-title"><span class="selo" aria-hidden="true">⭐</span>Destaques</h2>
+      <div class="destaques-scroll" id="destaques-scroll"></div>
+    </section>
+
+    <div id="categorias-container"><!-- seções de categoria/produtos geradas via JS --></div>
+
+    <p id="sem-resultado" class="empty-state hidden">Nenhum produto encontrado para essa busca 🔍</p>
+
+    <footer class="app-footer">
+      Brutu's Delivery · Cardápio digital · Peça com facilidade pelo WhatsApp
+    </footer>
+  </main>
+
+  <!-- ---------- Barra flutuante do carrinho ---------- -->
+  <div class="cart-bar hidden" id="cart-bar">
+    <button class="cart-bar-inner" id="cart-bar-btn" type="button">
+      <span class="cart-bar-count">
+        <span class="cart-bar-badge" id="cart-bar-badge">0</span>
+        <span id="cart-bar-label">Ver sacola</span>
+      </span>
+      <span class="cart-bar-cta">
+        <span id="cart-bar-total">R$ 0,00</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="9 18 15 12 9 6"/></svg>
+      </span>
+    </button>
+  </div>
+
+</div>
+
+<!-- ======================= MODAL DE PRODUTO ======================= -->
+<div class="overlay hidden" id="product-overlay" role="dialog" aria-modal="true" aria-labelledby="product-modal-title">
+  <div class="sheet" id="product-sheet">
+    <button class="sheet-close" id="product-close" aria-label="Fechar">✕</button>
+    <img id="product-modal-photo" class="product-modal-photo" src="" alt="">
+    <div class="product-modal-body">
+      <h2 class="product-modal-title" id="product-modal-title"></h2>
+      <p class="product-modal-desc" id="product-modal-desc"></p>
+
+      <div class="info-block" id="product-ingredientes-block">
+        <h3>Ingredientes</h3>
+        <div class="tag-list" id="product-ingredientes"></div>
+      </div>
+
+      <div class="info-block hidden" id="product-adicionais-block">
+        <h3>Adicionais</h3>
+        <div id="product-adicionais-list"></div>
+      </div>
+
+      <div class="info-block">
+        <h3>Observações</h3>
+        <textarea class="obs-input" id="product-obs" rows="2" maxlength="140" placeholder="Ex: sem cebola, ponto da carne, etc."></textarea>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <div class="qty-stepper">
+        <button class="qty-btn" id="qty-minus" type="button" aria-label="Diminuir quantidade">−</button>
+        <span class="qty-value" id="qty-value">1</span>
+        <button class="qty-btn" id="qty-plus" type="button" aria-label="Aumentar quantidade">+</button>
+      </div>
+      <button class="btn-primary" id="add-to-cart-btn" type="button">
+        <span>Adicionar</span>
+        <span class="preco" id="product-modal-preco">R$ 0,00</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ======================= CARRINHO / CHECKOUT ======================= -->
+<div class="overlay hidden" id="cart-overlay" role="dialog" aria-modal="true" aria-labelledby="cart-title">
+  <div class="sheet" id="cart-sheet">
+    <button class="sheet-close" id="cart-close" aria-label="Fechar">✕</button>
+
+    <div id="cart-empty-view" class="empty-cart hidden">
+      <div class="selo" aria-hidden="true">B</div>
+      <p>Sua sacola está vazia.<br>Adicione produtos do cardápio para continuar.</p>
+    </div>
+
+    <div id="cart-filled-view">
+      <div class="cart-header"><h2 class="cart-title">Sua sacola</h2></div>
+      <p id="cart-loja-fechada-aviso" class="loja-fechada-aviso hidden" role="status">
+        ⚠️ A loja está fechada no momento. Você pode montar o pedido, mas só poderá enviá-lo quando reabrirmos.
+      </p>
+      <div class="cart-items" id="cart-items-list"></div>
+
+      <div class="cart-summary">
+        <div class="summary-row"><span>Subtotal</span><span id="cart-subtotal">R$ 0,00</span></div>
+        <div class="summary-row" id="cart-taxa-row"><span>Taxa de entrega</span><span id="cart-taxa">R$ 0,00</span></div>
+        <div class="summary-row hidden" id="cart-desconto-row"><span>Desconto <span id="cart-cupom-label"></span></span><span id="cart-desconto">− R$ 0,00</span></div>
+        <div class="summary-row total"><span>Total</span><span class="valor" id="cart-total">R$ 0,00</span></div>
+      </div>
+
+      <div class="form-section" style="padding-top:0;">
+        <h3>Cupom de desconto</h3>
+        <div class="field cupom-field" style="display:flex;gap:8px;align-items:flex-start;">
+          <div style="flex:1;">
+            <input class="text-input" type="text" id="input-cupom" placeholder="Código do cupom" autocomplete="off" style="text-transform:uppercase;">
+            <span class="error-text" id="cupom-erro" style="display:none;"></span>
+            <span class="success-text" id="cupom-ok" style="display:none;color:#37c973;font-size:12.5px;"></span>
+          </div>
+          <button type="button" class="btn-add-mini" id="btn-aplicar-cupom" style="width:auto;padding:10px 14px;border-radius:10px;flex:0 0 auto;">Aplicar</button>
+        </div>
+      </div>
+
+      <div class="form-section hidden" id="secao-premios-roleta" style="padding-top:0;">
+        <h3>Usar um prêmio</h3>
+        <div id="lista-premios-checkout" class="premios-checkout-lista"></div>
+        <p class="roleta-hint" style="margin:8px 0 0;">Apenas 1 prêmio por pedido. Não pode combinar com outro prêmio.</p>
+      </div>
+
+      <!-- Entrega ou retirada -->
+      <div class="form-section">
+        <h3>Entrega ou retirada</h3>
+        <div class="segmented" role="group" aria-label="Tipo de entrega">
+          <button type="button" id="opt-entrega" aria-pressed="true">🛵 Entrega</button>
+          <button type="button" id="opt-retirada" aria-pressed="false">🏃 Retirar no local</button>
+        </div>
+      </div>
+
+      <!-- Dados do cliente -->
+      <form id="checkout-form" novalidate>
+        <div class="form-section" style="padding-top:0;">
+          <h3>Seus dados</h3>
+          <div class="field">
+            <label for="input-nome">Nome</label>
+            <input class="text-input" type="text" id="input-nome" name="nome" autocomplete="name" required>
+            <span class="error-text">Informe seu nome.</span>
+          </div>
+          <div class="field">
+            <label for="input-telefone">Telefone / WhatsApp</label>
+            <input class="text-input" type="tel" id="input-telefone" name="telefone" placeholder="(16) 99999-9999" autocomplete="tel" required>
+            <span class="error-text">Informe um telefone para contato.</span>
+          </div>
+        </div>
+
+        <div class="form-section" style="padding-top:0;" id="endereco-section">
+          <h3>Endereço de entrega</h3>
+          <div class="field">
+            <label for="input-endereco">Endereço</label>
+            <input class="text-input" type="text" id="input-endereco" name="endereco" placeholder="Rua, avenida..." autocomplete="street-address" required>
+            <span class="error-text">Informe o endereço.</span>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="input-numero">Número</label>
+              <input class="text-input" type="text" id="input-numero" name="numero" inputmode="numeric" required>
+              <span class="error-text">Obrigatório.</span>
+            </div>
+            <div class="field">
+              <label for="input-bairro">Bairro</label>
+              <select class="text-input" id="input-bairro" name="bairro" required>
+                <option value="" disabled selected>Selecione seu bairro...</option>
+              </select>
+              <span class="error-text">Obrigatório.</span>
+            </div>
+          </div>
+          <div class="field">
+            <label for="input-referencia">Ponto de referência (opcional)</label>
+            <input class="text-input" type="text" id="input-referencia" name="referencia" placeholder="Ex: perto do mercado tal">
+          </div>
+        </div>
+
+        <div class="form-section" style="padding-top:0;">
+          <h3>Forma de pagamento</h3>
+          <div class="payment-options" role="radiogroup" aria-label="Forma de pagamento">
+            <button type="button" class="payment-option" data-pagamento="PIX" aria-pressed="true">
+              <span class="radio-dot"></span> PIX
+            </button>
+            <button type="button" class="payment-option" data-pagamento="Dinheiro" aria-pressed="false">
+              <span class="radio-dot"></span> Dinheiro
+            </button>
+            <button type="button" class="payment-option" data-pagamento="Cartão" aria-pressed="false">
+              <span class="radio-dot"></span> Cartão (na entrega/retirada)
+            </button>
+          </div>
+          <div class="field hidden" id="troco-field" style="margin-top:12px;">
+            <label for="input-troco">Vai pagar com quanto?</label>
+            <input class="text-input" type="text" inputmode="decimal" id="input-troco" name="troco" placeholder="Ex: 100,00 (deixe em branco se não precisar de troco)">
+            <div id="troco-resultado" class="troco-resultado hidden"></div>
+          </div>
+
+          <div class="pix-info hidden" id="pix-info">
+            <div class="pix-info-header">
+              <span id="pix-tipo-titulo">Pague com Pix (CPF)</span>
+              <span class="pix-valor" id="pix-valor">R$ 0,00</span>
+            </div>
+            <div class="pix-qrcode-wrap">
+              <div id="pix-qrcode" class="pix-qrcode" aria-label="QR Code Pix"></div>
+            </div>
+            <div class="pix-chave-row">
+              <div>
+                <span class="pix-chave-label" id="pix-tipo-label">Chave (CPF)</span>
+                <span class="pix-chave-valor" id="pix-chave-display">572.022.678-88</span>
+              </div>
+              <button type="button" class="pix-copy-btn" id="pix-copiar-chave">Copiar chave</button>
+            </div>
+            <button type="button" class="pix-copy-btn pix-copy-full" id="pix-copiar-codigo">Copiar código Pix (com valor)</button>
+            <p class="pix-hint">Titular: Ana Livia · Morro Agudo</p>
+            <p class="pix-hint">Envie o comprovante junto com o pedido no WhatsApp.</p>
+          </div>
+        </div>
+
+        <div class="form-section" style="padding-top:0;">
+          <h3>Observação geral do pedido (opcional)</h3>
+          <textarea class="obs-input" id="input-observacao-geral" rows="2" maxlength="200" placeholder="Ex: tocar a campainha, retirar cebola de tudo..."></textarea>
+        </div>
+      </form>
+
+      <div class="finalize-footer">
+        <div class="finalize-total">
+          <span>Total do pedido</span>
+          <span class="valor" id="finalize-total">R$ 0,00</span>
+        </div>
+
+        <div class="checkout-alert-card" role="alert">
+          <div class="checkout-alert-title">⚠️ Atenção</div>
+          <p class="checkout-alert-text">Seu pedido ainda <strong>NÃO</strong> foi enviado. Após tocar em "Finalizar Pedido", o WhatsApp será aberto. Você ainda deverá tocar no botão verde "Enviar". Se fechar o WhatsApp antes disso, o restaurante não receberá seu pedido.</p>
+        </div>
+
+        <label class="checkout-confirm-checkbox" for="checkbox-confirmar-envio">
+          <input type="checkbox" id="checkbox-confirmar-envio">
+          <span>Li e entendi que preciso confirmar o envio dentro do WhatsApp.</span>
+        </label>
+        <div class="checkout-confirm-hint" id="checkout-confirm-hint">Marque a caixa acima para liberar o envio do pedido.</div>
+
+        <div class="whatsapp-warning-banner hidden" id="whatsapp-warning-banner" role="alert">
+          <span id="whatsapp-warning-texto">⚠️ Confirme o envio no WhatsApp para finalizar seu pedido!</span>
+          <button type="button" id="whatsapp-warning-copy" class="whatsapp-copy-link">📋 Copiar pedido</button>
+          <button type="button" id="whatsapp-warning-close" aria-label="Fechar aviso">✕</button>
+        </div>
+        <div class="whatsapp-blocked-banner hidden" id="whatsapp-blocked-banner" role="alert">
+          <span id="whatsapp-blocked-texto">📵 Seu navegador bloqueou a abertura automática do WhatsApp.</span>
+          <a href="#" id="whatsapp-blocked-link" class="whatsapp-blocked-link" target="_blank" rel="noopener">Toque aqui para enviar seu pedido</a>
+          <button type="button" id="whatsapp-blocked-copy" class="whatsapp-copy-link">📋 Copiar pedido</button>
+        </div>
+        <button class="btn-whatsapp" id="finalizar-btn" type="button" disabled>
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.29-1.39a9.87 9.87 0 0 0 4.75 1.21h.01c5.46 0 9.9-4.45 9.9-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2zm0 18.13a8.2 8.2 0 0 1-4.2-1.15l-.3-.18-3.14.82.84-3.06-.2-.31a8.2 8.2 0 0 1-1.26-4.34c0-4.54 3.7-8.24 8.26-8.24 2.2 0 4.27.86 5.83 2.42a8.18 8.18 0 0 1 2.41 5.83c0 4.55-3.7 8.21-8.24 8.21zm4.52-6.16c-.25-.12-1.47-.72-1.7-.81-.23-.08-.4-.12-.56.13-.17.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.12-1.04-.38-1.99-1.22-.73-.65-1.23-1.46-1.37-1.71-.14-.25-.02-.38.11-.51.11-.11.25-.29.37-.43.12-.14.16-.25.25-.41.08-.17.04-.31-.02-.44-.06-.12-.56-1.34-.76-1.84-.2-.48-.4-.42-.56-.42-.14 0-.31-.01-.48-.01-.17 0-.44.06-.67.31-.23.25-.87.85-.87 2.08 0 1.23.89 2.41 1.01 2.58.12.17 1.75 2.67 4.24 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.55.1.47-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.14-1.18-.06-.1-.23-.16-.48-.28z"/></svg>
+          Abrir WhatsApp para Enviar Pedido
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="order-modal-overlay hidden" id="order-modal-overlay">
+    <div class="order-modal" role="dialog" aria-modal="true" aria-labelledby="order-modal-title">
+      <button type="button" class="order-modal-close" id="order-modal-close" aria-label="Fechar">✕</button>
+      <div class="order-modal-icon">📲</div>
+      <h3 id="order-modal-title">Pedido quase concluído</h3>
+      <p>O WhatsApp foi aberto com seu pedido. Agora falta apenas tocar no botão verde <strong>"Enviar"</strong>. O restaurante somente receberá seu pedido após essa confirmação.</p>
+      <button type="button" class="btn-whatsapp order-modal-btn" id="order-modal-entendi">Entendi</button>
+    </div>
+  </div>
+</div>
+
+<!-- Dados do cardápio embutidos em JS (funciona abrindo o arquivo com duplo clique,
+     sem precisar de servidor). Para editar o cardápio, mexa neste arquivo. -->
+<script src="data/menu-data.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
+
+<!-- ======================= ROLETA DA SORTE ======================= -->
+<button type="button" id="roleta-open-btn" class="roleta-fab" aria-label="Roleta da Sorte">
+  🎰 <span>Roleta</span>
+</button>
+
+<div id="roleta-overlay" class="roleta-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="roleta-title">
+  <div class="roleta-sheet">
+    <button type="button" class="roleta-close" id="roleta-close" aria-label="Fechar">✕</button>
+    <h2 id="roleta-title">Roleta da Sorte</h2>
+    <p class="roleta-sub">Gire e ganhe prêmios exclusivos Brutu's!</p>
+
+    <div class="roleta-tel-row">
+      <input type="tel" id="roleta-tel-input" class="text-input" placeholder="Seu WhatsApp com DDD" inputmode="tel">
+      <button type="button" id="roleta-btn-tel" class="roleta-btn-sec">OK</button>
+    </div>
+
+    <div class="roleta-giros">Giros disponíveis: <strong id="roleta-giros-count">0</strong></div>
+
+    <div class="roleta-stage">
+      <div class="roleta-pointer" aria-hidden="true">▼</div>
+      <div class="roleta-roda-wrap">
+        <div id="roleta-roda" class="roleta-roda"></div>
+        <div id="roleta-labels" class="roleta-labels"></div>
+        <div class="roleta-centro">B</div>
+      </div>
+    </div>
+
+    <button type="button" id="roleta-btn-girar" class="roleta-btn-girar" disabled>Girar!</button>
+
+    <h3 class="roleta-meus-titulo">🎁 Meus Prêmios</h3>
+    <div id="roleta-meus-premios" class="roleta-meus-lista"></div>
+    <p class="roleta-hint">1 giro a cada pedido <strong>entregue</strong>. Prêmios valem 7 dias. Use 1 por pedido no checkout.</p>
+  </div>
+</div>
+
+<div id="roleta-win-modal" class="roleta-win-modal hidden" role="dialog" aria-modal="true">
+  <div class="roleta-win-caixa">
+    <div id="roleta-confetti" class="roleta-confetti"></div>
+    <div id="roleta-win-icone" class="roleta-win-icone">🎁</div>
+    <h3>Parabéns!</h3>
+    <p id="roleta-win-nome" class="roleta-win-nome">Prêmio</p>
+    <p class="roleta-win-msg">Seu prêmio foi salvo em <strong>Meus Prêmios</strong> e vale por 7 dias.</p>
+    <button type="button" id="roleta-win-depois" class="roleta-btn-girar">Resgatar depois</button>
+  </div>
+</div>
+
+<script src="js/roleta.js"></script>
+<script src="js/app.js" defer></script>
+</body>
+</html>
