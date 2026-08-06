@@ -1,0 +1,41 @@
+{
+  "premios": [
+    {
+      "id": "desc5",
+      "nome": "5% de desconto",
+      "icone": "🏷️",
+      "tipo": "desconto_percentual",
+      "valor": 5,
+      "probabilidade": 45,
+      "cor": "#ff5a1f"
+    },
+    {
+      "id": "batata",
+      "nome": "Batata Frita 200 g grátis",
+      "icone": "🍟",
+      "tipo": "produto_gratis",
+      "produtoId": "p001",
+      "probabilidade": 25,
+      "cor": "#ffb100"
+    },
+    {
+      "id": "refri",
+      "nome": "Refrigerante lata grátis",
+      "icone": "🥤",
+      "tipo": "produto_gratis",
+      "produtoId": "b001",
+      "probabilidade": 20,
+      "cor": "#37c973"
+    },
+    {
+      "id": "frupic",
+      "nome": "Suco Frupic grátis",
+      "icone": "🧃",
+      "tipo": "produto_gratis",
+      "produtoId": "b009",
+      "probabilidade": 10,
+      "cor": "#5b8def"
+    }
+  ],
+  "validadeDias": 7
+}

@@ -20,7 +20,9 @@
     "horario": {
       "abre": "18:00",
       "fecha": "23:30",
-      "diasFechado": []
+      "diasFechado": [
+        3
+      ]
     }
   },
   "categorias": [

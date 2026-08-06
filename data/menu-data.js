@@ -1,4 +1,4 @@
-// Gerado a partir de data/menu.json
+// Gerado automaticamente pelo servidor a partir de data/menu.json
 window.MENU_DATA = {
   "restaurante": {
     "nome": "Brutu's Delivery",
@@ -21,7 +21,9 @@ window.MENU_DATA = {
     "horario": {
       "abre": "18:00",
       "fecha": "23:30",
-      "diasFechado": []
+      "diasFechado": [
+        3
+      ]
     }
   },
   "categorias": [
