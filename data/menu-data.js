@@ -23,7 +23,15 @@ window.MENU_DATA = {
       "fecha": "23:30",
       "diasFechado": [
         3
-      ]
+      ],
+      "excecoes": {
+        "5": {
+          "fecha": "03:00"
+        },
+        "6": {
+          "fecha": "03:00"
+        }
+      }
     }
   },
   "categorias": [

@@ -206,20 +206,48 @@
 
     const agora = new Date();
     const diaSemana = agora.getDay(); // 0=domingo ... 6=sábado
-    const diasFechado = horario.diasFechado || [];
-    if (diasFechado.includes(diaSemana)) return false;
-
+    const diaAnterior = (diaSemana + 6) % 7;
     const minutosAgora = agora.getHours() * 60 + agora.getMinutes();
-    const [horaAbre, minAbre] = (horario.abre || "00:00").split(":").map(Number);
-    const [horaFecha, minFecha] = (horario.fecha || "23:59").split(":").map(Number);
+    const diasFechado = horario.diasFechado || [];
+
+    // Retorna {abre, fecha} do dia informado, usando a exceção específica
+    // desse dia da semana (horario.excecoes[dia]) quando existir, ou o
+    // horário padrão (horario.abre / horario.fecha) como fallback.
+    function horarioDoDia(dia) {
+      const excecao = horario.excecoes && horario.excecoes[dia];
+      return {
+        abre: (excecao && excecao.abre) || horario.abre || "00:00",
+        fecha: (excecao && excecao.fecha) || horario.fecha || "23:59",
+      };
+    }
+
+    // 1) Turno de ONTEM: se ontem não estava fechado e o horário de ontem
+    //    atravessa a meia-noite (fecha < abre), o turno pode continuar
+    //    aberto até agora (ex: sexta 18:00 até sábado 03:00).
+    if (!diasFechado.includes(diaAnterior)) {
+      const hOntem = horarioDoDia(diaAnterior);
+      const [haO, maO] = hOntem.abre.split(":").map(Number);
+      const [hfO, mfO] = hOntem.fecha.split(":").map(Number);
+      const minAbreOntem = haO * 60 + maO;
+      const minFechaOntem = hfO * 60 + mfO;
+      if (minFechaOntem < minAbreOntem && minutosAgora <= minFechaOntem) {
+        return true;
+      }
+    }
+
+    // 2) Turno de HOJE
+    if (diasFechado.includes(diaSemana)) return false;
+    const hHoje = horarioDoDia(diaSemana);
+    const [horaAbre, minAbre] = hHoje.abre.split(":").map(Number);
+    const [horaFecha, minFecha] = hHoje.fecha.split(":").map(Number);
     const minutosAbre = horaAbre * 60 + minAbre;
     const minutosFecha = horaFecha * 60 + minFecha;
 
     if (minutosFecha > minutosAbre) {
-      // horário no mesmo dia, ex: 18:00 até 23:59
+      // horário no mesmo dia, ex: 18:00 até 23:30
       return minutosAgora >= minutosAbre && minutosAgora <= minutosFecha;
     }
-    // horário que atravessa a meia-noite, ex: 18:00 até 02:00
+    // horário que atravessa a meia-noite, ex: 18:00 até 03:00
     return minutosAgora >= minutosAbre || minutosAgora <= minutosFecha;
   }
 
@@ -309,7 +337,7 @@
       card.setAttribute("aria-label", `${produto.nome}, ${formatarPreco(produto.preco)}`);
       card.innerHTML = `
         <div class="destaque-photo">
-          <img src="${produto.foto}" alt="" loading="lazy">
+          <img src="${produto.foto}" alt="${produto.nome}" loading="lazy">
         </div>
         <div class="destaque-nome">${produto.nome}</div>
         <div class="destaque-preco">${formatarPreco(produto.preco)}</div>
@@ -394,7 +422,7 @@
       <div class="product-photo">
         ${produto.destaque ? `<span class="badge-destaque selo">TOP</span>` : ""}
         ${produto.lancamento ? `<span class="badge-lancamento">🆕 Novo</span>` : ""}
-        <img src="${produto.foto}" alt="" loading="lazy">
+        <img src="${produto.foto}" alt="${produto.nome}" loading="lazy">
       </div>
       <div class="product-info">
         <div class="product-name">${produto.nome}</div>
