@@ -126,6 +126,7 @@ body::before{
 .brand-meta{
   display:flex; align-items:center; gap:8px;
   font-size:12px; color: var(--text-dim);
+  flex-wrap: wrap; row-gap:2px;
 }
 .brand-meta .dot{ color: var(--accent); }
 .status-aberto{ color:#7be08a; }
