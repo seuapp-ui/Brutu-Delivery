@@ -284,7 +284,7 @@ function salvarClientes(dados) {
 }
 
 function lerRoletaConfig() {
-  return lerJson(ROLETA_CONFIG_FILE, { premios: [], validadeDias: 7 });
+  return lerJson(ROLETA_CONFIG_FILE, { ativo: true, premios: [], validadeDias: 7 });
 }
 
 function clientePadrao(telefone) {
@@ -335,6 +335,19 @@ app.get("/api/roleta/config", (req, res) => {
   res.json(lerRoletaConfig());
 });
 
+// Liga/desliga a roleta (e opcionalmente atualiza prêmios/validade) — uso do painel
+app.put("/api/roleta/config", exigirAuth, (req, res) => {
+  const atual = lerRoletaConfig();
+  const body = req.body || {};
+  const novo = {
+    ativo: typeof body.ativo === "boolean" ? body.ativo : !!atual.ativo,
+    premios: Array.isArray(body.premios) ? body.premios : atual.premios || [],
+    validadeDias: Number.isFinite(Number(body.validadeDias)) ? Number(body.validadeDias) : (atual.validadeDias || 7),
+  };
+  escreverJson(ROLETA_CONFIG_FILE, novo);
+  res.json({ ok: true, config: novo });
+});
+
 app.get("/api/roleta/cliente/:telefone", (req, res) => {
   const info = obterCliente(req.params.telefone);
   if (!info) return res.status(400).json({ erro: "Telefone inválido." });
@@ -366,6 +379,9 @@ app.post("/api/roleta/girar", (req, res) => {
   }
 
   const cfg = lerRoletaConfig();
+  if (cfg.ativo === false) {
+    return res.status(409).json({ erro: "A roleta está desativada no momento." });
+  }
   const premiosCfg = cfg.premios || [];
   if (!premiosCfg.length) return res.status(500).json({ erro: "Roleta sem prêmios configurados." });
 
@@ -460,6 +476,6 @@ app.use(express.static(ROOT));
 
 app.listen(PORT, () => {
   console.log(`Brutu's API + site em http://localhost:${PORT}`);
-  console.log(`Painel: http://localhost:${PORT}/painel-produtos.html`);
+  console.log(`Painel: http://localhost:${PORT}/painel de controle.html`);
   console.log(`Cardápio: http://localhost:${PORT}/`);
 });

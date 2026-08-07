@@ -1,13 +1,13 @@
 /* =========================================================================
    site-config.js — CONFIGURAÇÃO CENTRAL DO SITE
    -------------------------------------------------------------------------
-   Este arquivo é lido por index.html, painel.html e painel-produtos.html.
+   Este arquivo é lido por index.html, painel.html e painel de controle.html.
    ========================================================================= */
 
 window.SITE_CONFIG = {
 
   // Senha legada (painel.html / fallback offline). Com a API rodando,
-  // o login do painel-produtos usa usuario+senha em backend/data/auth.json.
+  // o login do painel de controle usa usuario+senha em backend/data/auth.json.
   senhaPainel: "5625",
 
   // URL da API. Vazio = mesma origem (quando o site é servido pelo backend).

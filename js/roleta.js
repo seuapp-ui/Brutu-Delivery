@@ -298,6 +298,7 @@
       state.config = await api("/api/roleta/config");
     } catch (e) {
       state.config = {
+        ativo: true,
         premios: [
           { id: "desc5", nome: "5% de desconto", icone: "🏷️", tipo: "desconto_percentual", valor: 5, probabilidade: 45, cor: "#ff5a1f" },
           { id: "batata", nome: "Batata Frita 200 g grátis", icone: "🍟", tipo: "produto_gratis", produtoId: "p001", probabilidade: 25, cor: "#ffb100" },
@@ -307,6 +308,15 @@
         validadeDias: 7,
       };
     }
+
+    // Se o lojista desativou a roleta no painel, esconde o botão flutuante e o modal
+    if (state.config && state.config.ativo === false) {
+      $("#roleta-open-btn")?.classList.add("hidden");
+      $("#roleta-overlay")?.classList.add("hidden");
+      window.BRUTUS_ROLETA = { config: () => state.config };
+      return;
+    }
+
     montarRoda(state.config.premios);
 
     $("#roleta-open-btn")?.addEventListener("click", abrirModal);

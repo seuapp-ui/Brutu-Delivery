@@ -497,7 +497,7 @@ window.MENU_DATA = {
       "id": "e003",
       "categoria": "especiais",
       "nome": "Xtudo Brutus",
-      "descricao": "Pão, hambúrguer, salsicha, bacon, ovo, presunto, muçarela, catupiry, cheddar, alface, tomate e molho da casa.",
+      "descricao": "Pão, hambúrguer, salsicha, bacon, ovo, presunto, muçarela, catupiry, cheddar, alface, tomate, batata palha e molho da casa.",
       "foto": "img/produtos/xtudo-brutus.jpg",
       "preco": 42.9,
       "ingredientes": [
@@ -512,6 +512,7 @@ window.MENU_DATA = {
         "Cheddar",
         "Alface",
         "Tomate",
+        "Batata palha",
         "Molho da casa"
       ],
       "adicionais": [
@@ -1028,6 +1029,85 @@ window.MENU_DATA = {
         "add-bacon",
         "add-cheddar",
         "add-ovo"
+      ],
+      "destaque": true,
+      "lancamento": true
+    },
+    {
+      "id": "l004",
+      "categoria": "lancamentos",
+      "nome": "Costela Brutos",
+      "descricao": "Pão, hambúrguer, costela desfiada, muçarela, catupiry, alface, tomate e molho da casa.",
+      "foto": "img/produtos/costela-brutos.jpg",
+      "preco": 38.9,
+      "ingredientes": [
+        "Pão",
+        "Hambúrguer",
+        "Costela desfiada",
+        "Muçarela",
+        "Catupiry",
+        "Alface",
+        "Tomate",
+        "Molho da casa"
+      ],
+      "adicionais": [
+        "add-bacon",
+        "add-cheddar",
+        "add-ovo",
+        "add-cebola-caramelizada",
+        "add-hamburguer-extra"
+      ],
+      "destaque": true,
+      "lancamento": true
+    },
+    {
+      "id": "l005",
+      "categoria": "lancamentos",
+      "nome": "Brutu's Veggie",
+      "descricao": "Pão macio, 2 catupirys empanados, muçarela e cheddar, cebola roxa, rúcula, tomate e molho da casa.",
+      "foto": "img/produtos/brutus-veggie.jpg",
+      "preco": 38.9,
+      "ingredientes": [
+        "Pão macio",
+        "Catupiry empanado (2 unidades)",
+        "Muçarela",
+        "Cheddar",
+        "Cebola roxa",
+        "Rúcula",
+        "Tomate",
+        "Molho da casa"
+      ],
+      "adicionais": [
+        "add-cheddar",
+        "add-cebola-caramelizada"
+      ],
+      "destaque": true,
+      "lancamento": true
+    },
+    {
+      "id": "l006",
+      "categoria": "lancamentos",
+      "nome": "King Costela Brutus",
+      "descricao": "Pão selado na manteiga, hambúrguer blend 180g, costela desfiada, bacon, cebola caramelizada, fatia de cheddar, anel de cebola, catupiry e molho da casa.",
+      "foto": "img/produtos/king-costela-brutus.jpg",
+      "preco": 46.9,
+      "ingredientes": [
+        "Pão",
+        "Hambúrguer (blend 180g)",
+        "Costela desfiada",
+        "Bacon",
+        "Cebola caramelizada",
+        "Cheddar",
+        "Anel de cebola",
+        "Catupiry",
+        "Molho da casa"
+      ],
+      "adicionais": [
+        "add-bacon",
+        "add-cheddar",
+        "add-ovo",
+        "add-cebola-caramelizada",
+        "add-hamburguer-extra"
       ],
       "destaque": true,
       "lancamento": true
