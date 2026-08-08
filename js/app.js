@@ -33,6 +33,22 @@
   // visita. Nada disso é enviado para nenhum servidor — fica só no aparelho.
   const CUSTOMER_STORAGE_KEY = "brutus-delivery:cliente:v1";
 
+  // Resumo compacto do último pedido concluído (nome, itens, total, data) —
+  // usado só para conveniência do cliente (ex: "pedir de novo"). Não é o
+  // histórico completo de pedidos (isso já existe em "brutus-pedidos:v1").
+  const LAST_ORDER_STORAGE_KEY = "brutus-delivery:ultimo-pedido:v1";
+
+  // Versão do app — usada só em logs (ver seção 10, PWA) para identificar
+  // qual build está rodando. Para forçar arquivos estáticos (css/js) a
+  // atualizar em quem já instalou o app, troque também CACHE_VERSION em
+  // sw.js — os dois números são independentes.
+  const APP_VERSION = (window.SITE_CONFIG && window.SITE_CONFIG.appVersion) || "1.1.0";
+
+  // Intervalo de verificação automática de novidades no cardápio (produtos,
+  // preços, categorias, banners, avisos). Só troca os dados quando algo
+  // realmente mudou — ver seção 4B mais abaixo.
+  const MENU_POLL_INTERVAL_MS = 60 * 1000;
+
   /* =====================================================================
      2. ESTADO GLOBAL
      ===================================================================== */
@@ -48,6 +64,10 @@
     produtoEmEdicao: null,    // produto aberto no modal
     adicionaisSelecionados: [],   // array de Set — um Set por lanche (combos com vários lanches têm 1 Set por lanche)
     quantidadeModal: 1,
+    _statusInterval: null,     // setInterval do relógio "Aberto/Fechado" (já existia)
+    _menuPollInterval: null,   // setInterval da verificação automática do cardápio
+    _menuPollEmAndamento: false, // evita duas verificações simultâneas
+    _sectionsObserver: null,   // IntersectionObserver da nav de categorias
   };
 
   /* =====================================================================
@@ -115,6 +135,24 @@
   function carregarDadosCliente() {
     try {
       const raw = localStorage.getItem(CUSTOMER_STORAGE_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // Guarda só um resumo compacto do pedido mais recente (não é o histórico
+  // completo — isso já existe em "brutus-pedidos:v1"). Sempre sobrescreve o
+  // anterior, então nunca cresce sem limite.
+  function salvarUltimoPedido(resumo) {
+    try {
+      localStorage.setItem(LAST_ORDER_STORAGE_KEY, JSON.stringify(resumo));
+    } catch (e) { /* silencioso — recurso de conveniência, não crítico */ }
+  }
+
+  function carregarUltimoPedido() {
+    try {
+      const raw = localStorage.getItem(LAST_ORDER_STORAGE_KEY);
       return raw ? JSON.parse(raw) : null;
     } catch (e) {
       return null;
@@ -199,10 +237,90 @@
   }
 
   /* =====================================================================
+     4B. ATUALIZAÇÃO AUTOMÁTICA DO CARDÁPIO (a cada 60s, sem recarregar)
+     -------------------------------------------------------------------
+     A cada minuto, busca data/menu.json de novo e compara com o que já
+     está na tela. Se não mudou nada, não faz absolutamente nada (sem
+     re-render, sem piscada). Se mudou (produto, preço, categoria, banner,
+     disponibilidade, horário etc.), atualiza só as seções de exibição do
+     cardápio — nunca a sacola, o formulário de checkout ou modais abertos.
+     ===================================================================== */
+  function iniciarAtualizacaoAutomatica() {
+    if (location.protocol === "file:") return; // modo teste local, sem fetch
+    if (state._menuPollInterval) return; // já está rodando — não duplica
+
+    state._menuPollInterval = setInterval(verificarAtualizacaoMenu, MENU_POLL_INTERVAL_MS);
+
+    // Quando o cliente volta pra aba depois de um tempo fora, verifica na
+    // hora em vez de esperar o próximo tique do intervalo de 60s.
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") verificarAtualizacaoMenu();
+    });
+  }
+
+  async function verificarAtualizacaoMenu() {
+    // Aba em segundo plano: não gasta dados/bateria verificando à toa.
+    if (document.visibilityState === "hidden") return;
+    // Evita duas verificações simultâneas (ex: o intervalo e o
+    // visibilitychange disparando quase ao mesmo tempo).
+    if (state._menuPollEmAndamento) return;
+    state._menuPollEmAndamento = true;
+
+    try {
+      console.log("[UPDATE] Verificando atualização...");
+      const resp = await fetch(MENU_JSON_URL, { cache: "no-store" });
+      if (!resp.ok) throw new Error("Falha ao buscar menu.json");
+      const novoMenu = await resp.json();
+
+      const mudou = JSON.stringify(novoMenu) !== JSON.stringify(state.menu);
+      if (!mudou) {
+        console.log("[UPDATE] Nenhuma alteração encontrada.");
+        return;
+      }
+
+      console.log("[UPDATE] Novos dados encontrados.");
+      aplicarAtualizacaoMenu(novoMenu);
+      console.log("[UPDATE] Dados atualizados.");
+    } catch (erro) {
+      // Falha de rede/parse: mantém os dados atuais e tenta de novo no
+      // próximo ciclo — nunca quebra a tela nem limpa nada do cliente.
+      console.warn("[UPDATE] Não foi possível verificar atualizações agora:", erro);
+    } finally {
+      state._menuPollEmAndamento = false;
+    }
+  }
+
+  // Aplica um cardápio novo SEM tocar na sacola, no formulário de checkout
+  // ou em modais abertos — só re-renderiza cabeçalho, navegação de
+  // categorias, destaques e a lista de produtos (as mesmas funções usadas
+  // no carregamento inicial, então o resultado visual é idêntico ao de um
+  // carregamento normal, só que sem reload de página).
+  function aplicarAtualizacaoMenu(novoMenu) {
+    state.menu = novoMenu;
+
+    renderCabecalho();
+    renderCategoriaNav();
+    renderDestaques();
+    renderProdutos();
+    observarSecoes();
+
+    // Se a categoria que o cliente estava vendo deixou de existir (ex: foi
+    // removida no painel), volta a referência pra primeira categoria
+    // disponível só internamente — não mexe no scroll do cliente.
+    if (novoMenu.categorias?.length && !novoMenu.categorias.some((c) => c.id === state.categoriaAtiva)) {
+      state.categoriaAtiva = novoMenu.categorias[0].id;
+    }
+  }
+
+  /* =====================================================================
      5. RENDERIZAÇÃO — HOME
      ===================================================================== */
-  function calcularStatusAberto(horario) {
-    if (!horario) return true; // sem configuração de horário: assume sempre aberto
+  // Calcula se a loja está aberta agora e monta o texto a ser exibido no
+  // cabeçalho (ex: "Aberto agora · fecha às 03:00", "Fechado agora · abre
+  // às 18:00", "Fechado hoje"). Centraliza a lógica usada tanto pelo status
+  // visual quanto pelas checagens de "pode enviar pedido".
+  function obterInfoHorario(horario) {
+    if (!horario) return { aberto: true, texto: "" };
 
     const agora = new Date();
     const diaSemana = agora.getDay(); // 0=domingo ... 6=sábado
@@ -231,33 +349,46 @@
       const minAbreOntem = haO * 60 + maO;
       const minFechaOntem = hfO * 60 + mfO;
       if (minFechaOntem < minAbreOntem && minutosAgora <= minFechaOntem) {
-        return true;
+        return { aberto: true, texto: `Aberto agora · fecha às ${hOntem.fecha}` };
       }
     }
 
     // 2) Turno de HOJE
-    if (diasFechado.includes(diaSemana)) return false;
+    if (diasFechado.includes(diaSemana)) {
+      return { aberto: false, texto: "Fechado hoje" };
+    }
     const hHoje = horarioDoDia(diaSemana);
     const [horaAbre, minAbre] = hHoje.abre.split(":").map(Number);
     const [horaFecha, minFecha] = hHoje.fecha.split(":").map(Number);
     const minutosAbre = horaAbre * 60 + minAbre;
     const minutosFecha = horaFecha * 60 + minFecha;
 
+    let aberto;
     if (minutosFecha > minutosAbre) {
       // horário no mesmo dia, ex: 18:00 até 23:30
-      return minutosAgora >= minutosAbre && minutosAgora <= minutosFecha;
+      aberto = minutosAgora >= minutosAbre && minutosAgora <= minutosFecha;
+    } else {
+      // horário que atravessa a meia-noite, ex: 18:00 até 03:00
+      aberto = minutosAgora >= minutosAbre || minutosAgora <= minutosFecha;
     }
-    // horário que atravessa a meia-noite, ex: 18:00 até 03:00
-    return minutosAgora >= minutosAbre || minutosAgora <= minutosFecha;
+
+    const texto = aberto
+      ? `Aberto agora · fecha às ${hHoje.fecha}`
+      : `Fechado agora · abre às ${hHoje.abre}`;
+    return { aberto, texto };
+  }
+
+  function calcularStatusAberto(horario) {
+    return obterInfoHorario(horario).aberto;
   }
 
   function renderStatusAberto() {
     const r = state.menu?.restaurante;
     if (!r) return;
-    const aberto = calcularStatusAberto(r.horario);
+    const { aberto, texto } = obterInfoHorario(r.horario);
     const el = $("#restaurante-status");
     if (!el) return;
-    el.textContent = aberto ? "Aberto agora" : "Fechado no momento";
+    el.textContent = texto || (aberto ? "Aberto agora" : "Fechado no momento");
     el.classList.toggle("status-aberto", aberto);
     el.classList.toggle("status-fechado", !aberto);
   }
@@ -472,6 +603,15 @@
 
   // Atualiza o chip ativo conforme o usuário rola a página (IntersectionObserver)
   function observarSecoes() {
+    // Se já existe um observer de uma renderização anterior (ex: depois de
+    // uma atualização automática do cardápio), desconecta antes de criar
+    // outro — evita acumular observers "fantasmas" apontando pra seções
+    // que já não existem mais no DOM.
+    if (state._sectionsObserver) {
+      state._sectionsObserver.disconnect();
+      state._sectionsObserver = null;
+    }
+
     const secoes = $$("main section[id^='categoria-']");
     if (!secoes.length) return;
     const observer = new IntersectionObserver(
@@ -489,6 +629,7 @@
       { rootMargin: "-120px 0px -70% 0px", threshold: 0 }
     );
     secoes.forEach((s) => observer.observe(s));
+    state._sectionsObserver = observer;
   }
 
   /* =====================================================================
@@ -897,13 +1038,72 @@
     $("#cart-bar-total").textContent = formatarPreco(subtotalCarrinho());
   }
 
+  // Mostra, na sacola vazia, um atalho pra repetir o último pedido salvo
+  // localmente (ver salvarUltimoPedido). Recria os itens na sacola atual
+  // usando os preços/produtos de HOJE — se algum item saiu do cardápio
+  // nesse meio tempo, ele é simplesmente ignorado (sem travar o resto).
+  function renderSugestaoUltimoPedido() {
+    const container = $("#cart-ultimo-pedido");
+    if (!container) return;
+    const ultimo = carregarUltimoPedido();
+    if (!ultimo || !ultimo.itens?.length) {
+      container.classList.add("hidden");
+      container.innerHTML = "";
+      return;
+    }
+
+    const listaItens = ultimo.itens.map((i) => `${i.quantidade}x ${i.nome}`).join(", ");
+    container.innerHTML = `
+      <div class="ultimo-pedido-sugestao">
+        <strong>Pedir de novo?</strong>
+        <p>${listaItens} — ${formatarPreco(ultimo.total)}</p>
+        <button type="button" id="btn-repetir-pedido">Adicionar itens do último pedido</button>
+      </div>
+    `;
+    container.classList.remove("hidden");
+
+    $("#btn-repetir-pedido", container).addEventListener("click", () => {
+      let adicionados = 0;
+      ultimo.itens.forEach((i) => {
+        const produto = state.menu.produtos.find((p) => p.id === i.produtoId);
+        if (!produto || !produtoVisivelNoCardapio(produto)) return; // saiu do cardápio ou indisponível
+        state.cart.push({
+          uid: gerarUidItem(produto.id),
+          produtoId: produto.id,
+          nome: produto.nome,
+          precoBase: produto.preco,
+          adicionais: [],
+          observacao: "",
+          quantidade: i.quantidade || 1,
+        });
+        adicionados++;
+      });
+      if (adicionados === 0) {
+        mostrarToast("Esses itens não estão mais disponíveis no cardápio.");
+        return;
+      }
+      salvarCart();
+      renderCartBar();
+      renderCarrinho();
+      mostrarToast("Itens do último pedido adicionados à sacola ✅");
+    });
+  }
+
   function renderCarrinho() {
     const vazio = state.cart.length === 0;
     $("#cart-empty-view").classList.toggle("hidden", !vazio);
     $("#cart-filled-view").classList.toggle("hidden", vazio);
 
-    const lojaAberta = calcularStatusAberto(state.menu.restaurante.horario);
-    $("#cart-loja-fechada-aviso").classList.toggle("hidden", lojaAberta);
+    if (vazio) renderSugestaoUltimoPedido();
+
+    const infoHorario = obterInfoHorario(state.menu.restaurante.horario);
+    $("#cart-loja-fechada-aviso").classList.toggle("hidden", infoHorario.aberto);
+    if (!infoHorario.aberto) {
+      const msg = infoHorario.texto === "Fechado hoje"
+        ? "⚠️ A loja está fechada hoje. Você pode montar o pedido, mas só poderá enviá-lo quando reabrirmos."
+        : `⚠️ A loja está fechada no momento (${infoHorario.texto.replace("Fechado agora · ", "")}). Você pode montar o pedido, mas só poderá enviá-lo quando reabrirmos.`;
+      $("#cart-loja-fechada-aviso").textContent = msg;
+    }
 
     if (vazio) return;
 
@@ -1459,6 +1659,13 @@
     atualizarEstadoBotaoFinalizar();
 
     mostrarToast('Lembre-se: o pedido só chega ao restaurante depois que você tocar em "Enviar" no WhatsApp.', 4000, "sucesso");
+
+    // Se uma atualização de versão ficou esperando porque havia um pedido
+    // em andamento, agora que ele foi concluído (sacola vazia) é seguro
+    // aplicar sozinho — sem precisar que o cliente toque no aviso.
+    if ($("#toast-nova-versao") && podeAtualizarAutomaticamente()) {
+      window.location.reload();
+    }
   }
 
   function finalizarPedido() {
@@ -1559,6 +1766,13 @@
       lista.unshift(snapshotPedido);
       localStorage.setItem(PEDIDOS_KEY, JSON.stringify(lista.slice(0, 500)));
     } catch (e) {}
+    salvarUltimoPedido({
+      numero: numeroPedido,
+      nome: dadosCliente.nome,
+      itens: state.cart.map((i) => ({ produtoId: i.produtoId, nome: i.nome, quantidade: i.quantidade })),
+      total: totalCarrinho(),
+      dataHora: Date.now(),
+    });
     try {
       const apiBase = (window.SITE_CONFIG && window.SITE_CONFIG.apiBase) ? window.SITE_CONFIG.apiBase.replace(/\/$/, "") : "";
       // mesma origem quando o site é servido pelo backend
@@ -1689,13 +1903,66 @@
     // e do envio do pedido, só o recurso de "abrir sem internet".
     if (location.protocol === "file:") return;
     if (!("serviceWorker" in navigator)) return;
+
+    console.log(`[VERSION] Versão atual: ${APP_VERSION}`);
+
+    // Se, no momento em que essa aba carregou, JÁ existia um Service Worker
+    // controlando a página, então qualquer "controllerchange" que acontecer
+    // depois disso é uma atualização de verdade (uma versão nova assumiu no
+    // lugar da antiga). Se não existia controlador nenhum ainda, é só a
+    // primeira instalação do PWA nesse aparelho — não é "atualização".
+    const jaTinhaControlador = !!navigator.serviceWorker.controller;
+    let atualizacaoTratada = false;
+
     window.addEventListener("load", () => {
       navigator.serviceWorker.register("sw.js").catch((err) => {
         console.warn("Falha ao registrar o Service Worker:", err);
       });
     });
+
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      if (!jaTinhaControlador || atualizacaoTratada) return;
+      atualizacaoTratada = true;
+      console.log("[VERSION] Nova versão do app foi ativada pelo Service Worker.");
+      aplicarOuAvisarNovaVersao();
+    });
+
     window.addEventListener("online", () => mostrarOfflineBanner(false));
     window.addEventListener("offline", () => mostrarOfflineBanner(true));
+  }
+
+  // É seguro recarregar sozinho? Só quando não há risco de perder nada que
+  // o cliente esteja fazendo: sacola vazia e nenhum modal/overlay aberto.
+  function podeAtualizarAutomaticamente() {
+    const algumOverlayAberto = ["#product-overlay", "#cart-overlay", "#order-modal-overlay"]
+      .some((sel) => {
+        const el = $(sel);
+        return el && !el.classList.contains("hidden");
+      });
+    return state.cart.length === 0 && !algumOverlayAberto;
+  }
+
+  function aplicarOuAvisarNovaVersao() {
+    if (podeAtualizarAutomaticamente()) {
+      window.location.reload();
+      return;
+    }
+    mostrarAvisoNovaVersao();
+  }
+
+  // Aviso discreto (não bloqueia nada, não fecha nada) com um botão pra
+  // atualizar quando o cliente quiser/puder. Fica visível até ser tocado.
+  function mostrarAvisoNovaVersao() {
+    if ($("#toast-nova-versao")) return; // já está mostrando
+    const toast = document.createElement("div");
+    toast.id = "toast-nova-versao";
+    toast.className = "toast toast--update";
+    toast.innerHTML = `
+      <span>Uma nova versão do app está disponível.</span>
+      <button type="button" id="btn-atualizar-agora">Atualizar</button>
+    `;
+    document.body.appendChild(toast);
+    $("#btn-atualizar-agora", toast).addEventListener("click", () => window.location.reload());
   }
 
   /* =====================================================================
@@ -1829,6 +2096,7 @@
     preencherDadosClienteSalvos();
     registrarServiceWorker();
     atualizarPix();
+    iniciarAtualizacaoAutomatica();
 
     $("#loading-screen").classList.add("hidden");
     $("#app").classList.remove("hidden");

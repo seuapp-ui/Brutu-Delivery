@@ -725,6 +725,20 @@ textarea.obs-input:focus, input.text-input:focus, select.text-input:focus{
 .empty-cart{ text-align:center; padding:50px 20px; color: var(--text-dim); }
 .empty-cart .selo{ width:52px; height:52px; font-size:24px; margin-bottom:14px; }
 
+.ultimo-pedido-sugestao{
+  margin: 22px auto 0; max-width: 320px; text-align:left;
+  background: var(--bg-elevated); border:1px solid var(--line);
+  border-radius:14px; padding:14px 16px;
+}
+.ultimo-pedido-sugestao strong{ display:block; margin-bottom:4px; color: var(--text); font-size:13.5px; }
+.ultimo-pedido-sugestao p{ margin:0 0 10px; font-size:13px; line-height:1.4; }
+.ultimo-pedido-sugestao button{
+  width:100%; border:1px solid var(--accent); background:transparent;
+  color: var(--accent); font-weight:700; font-size:13.5px;
+  padding:9px 12px; border-radius:10px; cursor:pointer;
+}
+.ultimo-pedido-sugestao button:hover{ background: var(--accent); color:#fff; }
+
 /* ---------- Toast ---------- */
 .toast{
   position: fixed; left:50%; bottom:90px; transform: translateX(-50%);
@@ -801,6 +815,16 @@ textarea.obs-input:focus, input.text-input:focus, select.text-input:focus{
 /* ---------- Toast: variante de sucesso (verde) ---------- */
 .toast.toast--sucesso{
   border-color: var(--whatsapp); color:#eafff1;
+}
+.toast.toast--update{
+  display:flex; align-items:center; gap:12px;
+  border-radius:14px; padding:12px 14px;
+  max-width: calc(100vw - 32px);
+}
+.toast.toast--update button{
+  flex:0 0 auto; background: var(--accent); color:#fff; border:none;
+  font-weight:700; font-size:13px; padding:7px 14px; border-radius:999px;
+  cursor:pointer; white-space:nowrap;
 }
 
 /* ---------- Aviso: confirmar envio no WhatsApp ---------- */
