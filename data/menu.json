@@ -993,6 +993,26 @@
       "destaque": true
     },
     {
+      "id": "c007",
+      "categoria": "combos",
+      "nome": "Brutu's Barca Viking",
+      "descricao": "2 Lanches Clássicos, batata com cheddar e bacon, 10 Nuggets e 1 Refrigerante 2L. Uma barca cheia pra matar a fome de verdade!",
+      "foto": "img/produtos/barca-viking-brutus.jpg",
+      "preco": 99.9,
+      "ingredientes": [
+        "2x Lanche Clássico",
+        "Batata com cheddar e bacon",
+        "10x Nuggets",
+        "1x Refrigerante 2L"
+      ],
+      "adicionais": [
+        "add-cheddar",
+        "add-hamburguer-extra"
+      ],
+      "destaque": true,
+      "qtdLanches": 2
+    },
+    {
       "id": "l002",
       "categoria": "lancamentos",
       "nome": "Croc Catupiry Brutu's",
