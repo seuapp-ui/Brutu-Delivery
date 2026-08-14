@@ -316,16 +316,37 @@
      5. RENDERIZAÇÃO — HOME
      ===================================================================== */
   // Calcula se a loja está aberta agora e monta o texto a ser exibido no
-  // cabeçalho (ex: "Aberto agora · fecha às 03:00", "Fechado agora · abre
+  // cabeçalho (ex: "Aberto agora · fecha às 23:30", "Fechado agora · abre
   // às 18:00", "Fechado hoje"). Centraliza a lógica usada tanto pelo status
   // visual quanto pelas checagens de "pode enviar pedido".
+  // Horário SEMPRE em fuso fixo de Brasília (America/Sao_Paulo), independente
+  // do fuso/horário do dispositivo do cliente.
+  function obterPartesBrasilia() {
+    const agora = new Date();
+    const partes = Object.fromEntries(
+      new Intl.DateTimeFormat("en-US", {
+        timeZone: "America/Sao_Paulo",
+        weekday: "short",
+        hour: "2-digit",
+        minute: "2-digit",
+        hourCycle: "h23",
+      })
+        .formatToParts(agora)
+        .filter((p) => p.type !== "literal")
+        .map((p) => [p.type, p.value])
+    );
+    const mapaDia = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+    const diaSemana = mapaDia[partes.weekday] ?? 0;
+    const hora = parseInt(partes.hour, 10) || 0;
+    const minuto = parseInt(partes.minute, 10) || 0;
+    return { diaSemana, minutosAgora: hora * 60 + minuto };
+  }
+
   function obterInfoHorario(horario) {
     if (!horario) return { aberto: true, texto: "" };
 
-    const agora = new Date();
-    const diaSemana = agora.getDay(); // 0=domingo ... 6=sábado
+    const { diaSemana, minutosAgora } = obterPartesBrasilia();
     const diaAnterior = (diaSemana + 6) % 7;
-    const minutosAgora = agora.getHours() * 60 + agora.getMinutes();
     const diasFechado = horario.diasFechado || [];
 
     // Retorna {abre, fecha} do dia informado, usando a exceção específica
@@ -1488,8 +1509,13 @@
     const r = state.menu.restaurante;
     const linhas = [];
     const agora = new Date();
+    // Horário fixo de Brasília no texto do pedido
     const dataHora = agora.toLocaleString("pt-BR", {
-      day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit",
+      timeZone: "America/Sao_Paulo",
+      day: "2-digit",
+      month: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
     });
 
     linhas.push(`🍔 *NOVO PEDIDO — ${r.nome}*`, "");

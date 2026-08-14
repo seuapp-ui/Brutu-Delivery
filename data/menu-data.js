@@ -9,9 +9,9 @@ window.MENU_DATA = {
     "bannerImagemAlt": "",
     "whatsapp": "5516993319742",
     "pix": {
-      "chave": "57202267888",
-      "tipo": "cpf",
-      "titular": "Ana Livia",
+      "chave": "68351127000199",
+      "tipo": "cnpj",
+      "titular": "Ana Livia Silva Ribeiro",
       "cidade": "MORRO AGUDO"
     },
     "taxaEntrega": 5,
@@ -23,15 +23,7 @@ window.MENU_DATA = {
       "fecha": "23:30",
       "diasFechado": [
         3
-      ],
-      "excecoes": {
-        "5": {
-          "fecha": "03:00"
-        },
-        "6": {
-          "fecha": "03:00"
-        }
-      }
+      ]
     }
   },
   "categorias": [

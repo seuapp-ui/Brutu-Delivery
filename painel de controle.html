@@ -187,15 +187,43 @@ a{ color:inherit; }
 }
 
 @media (max-width: 860px){
-  .shell-sidebar{ flex-direction: column; }
-  .sidebar-nav.tabs{
-    flex-direction: row;
-    width: 100%;
-    position: static;
-    margin-bottom: 18px;
+  .shell-sidebar{
+    flex-direction: column;
+    gap: 12px;
+    padding-top: 12px;
+    padding-left: 12px;
+    padding-right: 12px;
   }
-  .sidebar-nav .tab-btn{ width: auto; }
-  .sidebar-nav .tab-btn span{ display:none; }
+  /* Em coluna o flex-basis 220px virava ALTURA — resetar para não esticar os botões */
+  .sidebar-nav.tabs{
+    flex: 0 0 auto;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    width: 100%;
+    max-width: 100%;
+    position: static;
+    top: auto;
+    margin-bottom: 4px;
+    gap: 6px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 4px;
+  }
+  .sidebar-nav.tabs::-webkit-scrollbar{ display: none; }
+  .sidebar-nav .tab-btn{
+    width: auto;
+    height: auto;
+    min-height: 42px;
+    min-width: 42px;
+    flex: 0 0 auto;
+    padding: 10px 12px;
+    justify-content: center;
+    border-radius: 12px;
+    font-size: 16px;
+    line-height: 1;
+  }
+  .sidebar-nav .tab-btn span{ display: none; }
 }
 
 .tab-panel{ display:none; }
@@ -408,8 +436,15 @@ a{ color:inherit; }
 .hidden{ display:none !important; }
 
 @media (max-width: 560px){
-  .stat-card .stat-value{ font-size: 26px; }
+  .stat-card .stat-value{ font-size: 22px; }
+  .stat-card{ padding: 14px; }
+  .stats-grid{
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
   .topbar .brand .sub{ display:none; }
+  .shell{ padding: 0 12px; }
+  .section-title{ margin-bottom: 10px; }
 }
 
 /* =========================================================================
