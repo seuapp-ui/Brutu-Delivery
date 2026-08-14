@@ -9,7 +9,7 @@ window.SITE_CONFIG = {
   // Versão do app — só usada em logs e no aviso de "nova versão disponível"
   // (ver js/app.js, seção PWA). Suba esse número junto com CACHE_VERSION em
   // sw.js sempre que publicar uma atualização de verdade.
-  appVersion: "1.1.0",
+  appVersion: "1.2.0",
 
   // Senha legada (painel.html / fallback offline). Com a API rodando,
   // o login do painel de controle usa usuario+senha em backend/data/auth.json.

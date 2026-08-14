@@ -14,7 +14,7 @@
    troque o número da versão abaixo.
    ========================================================================= */
 
-const CACHE_VERSION = "brutus-v4";
+const CACHE_VERSION = "brutus-v5";
 const STATIC_CACHE = `${CACHE_VERSION}-estatico`;
 const DATA_CACHE = `${CACHE_VERSION}-dados`;
 
@@ -25,6 +25,7 @@ const APP_SHELL = [
   "./js/app.js",
   "./css/roleta.css",
   "./js/roleta.js",
+  "./data/site-config.js",
   "./data/menu-data.js",
   "./manifest.json",
   "./icons/icon-192.png",
