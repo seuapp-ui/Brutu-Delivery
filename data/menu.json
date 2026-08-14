@@ -802,6 +802,17 @@
       "destaque": false
     },
     {
+      "id": "b023",
+      "categoria": "bebidas",
+      "nome": "Guaraná Antártica 2L",
+      "descricao": "Guaraná Antártica 2L",
+      "foto": "img/produtos/guarana-1l.jpg",
+      "preco": 14,
+      "ingredientes": [],
+      "adicionais": [],
+      "destaque": false
+    },
+    {
       "id": "b007",
       "categoria": "bebidas",
       "nome": "Refrigerante Jaboti 2L",
@@ -1083,12 +1094,12 @@
       "id": "l005",
       "categoria": "lancamentos",
       "nome": "Brutu's Veggie",
-      "descricao": "Pão macio, 2 catupirys empanados, muçarela e cheddar, cebola roxa, rúcula, tomate e molho da casa.",
+      "descricao": "Pão macio, 1 hambúrguer de catupiry empanado, muçarela e cheddar, cebola roxa, rúcula, tomate e molho da casa.",
       "foto": "img/produtos/brutus-veggie.jpg",
       "preco": 38.9,
       "ingredientes": [
         "Pão macio",
-        "Catupiry empanado (2 unidades)",
+        "Catupiry empanado (1 unidade)",
         "Muçarela",
         "Cheddar",
         "Cebola roxa",
@@ -1176,26 +1187,26 @@
   ],
   "cupons": [
     {
-      "id": "bemvindo10",
-      "codigo": "BEMVINDO10",
+      "id": "bemvindo2",
+      "codigo": "BEMVINDO2",
       "tipo": "percentual",
-      "valor": 10,
-      "minimo": 40,
+      "valor": 2,
+      "minimo": 60,
       "ativo": true,
       "usoMaximo": 0,
       "usos": 0,
-      "descricao": "10% de desconto em pedidos a partir de R$ 40"
+      "descricao": "2% de desconto em pedidos a partir de R$ 60"
     },
     {
       "id": "entrega5",
       "codigo": "ENTREGA5",
       "tipo": "fixo",
       "valor": 5,
-      "minimo": 0,
+      "minimo": 100,
       "ativo": true,
       "usoMaximo": 0,
       "usos": 0,
-      "descricao": "R$ 5 de desconto na taxa de entrega / pedido"
+      "descricao": "R$ 5 de desconto na taxa de entrega / pedido (mínimo R$ 100)"
     }
   ]
 }
