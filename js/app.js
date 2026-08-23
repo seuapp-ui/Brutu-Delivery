@@ -1671,7 +1671,7 @@
     }
   }
 
-  async function finalizarPedido() {
+  function finalizarPedido() {
     // Trava logo de cara: evita que um duplo clique rápido dispare o
     // envio duas vezes (duas janelas/abas do WhatsApp, duas mensagens).
     if (enviandoPedido) return;
@@ -1695,6 +1695,16 @@
 
     if (!validarFormulario()) {
       mostrarToast("Confira os campos destacados em vermelho.");
+      return;
+    }
+
+    const telefoneDigitado = $("#input-telefone").value.replace(/\D/g, "");
+    if (telefoneDigitado.length !== 10 && telefoneDigitado.length !== 11) {
+      const campoTelefone = $("#input-telefone");
+      const fieldTelefone = campoTelefone.closest(".field");
+      if (fieldTelefone) fieldTelefone.classList.add("invalid");
+      campoTelefone.focus();
+      mostrarToast("Informe o WhatsApp com DDD (10 ou 11 números). Exemplo: 34999999999.");
       return;
     }
 
@@ -1782,47 +1792,9 @@
       total: totalCarrinho(),
       dataHora: Date.now(),
     });
-    // Confirma primeiro no servidor. O WhatsApp só abre depois que o painel
-    // recebeu o pedido, evitando a falsa mensagem de sucesso.
-    try {
-      const apiBase = (window.SITE_CONFIG && window.SITE_CONFIG.apiBase)
-        ? String(window.SITE_CONFIG.apiBase).replace(/\/$/, "")
-        : "";
-      const chaveRoleta = window.BRUTUS_ROLETA && window.BRUTUS_ROLETA.getChave
-        ? window.BRUTUS_ROLETA.getChave()
-        : "";
-      // A chave fica apenas neste envio ao servidor; não é gravada no pedido
-      // local, mostrada no painel ou enviada ao WhatsApp.
-      const body = JSON.stringify({
-        ...snapshotPedido,
-        ...(chaveRoleta ? { roletaChave: chaveRoleta } : {}),
-      });
-      const opts = {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body,
-        keepalive: true,
-        cache: "no-store",
-      };
-      const urlPrimaria = (apiBase || "") + "/api/pedidos";
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 12000);
-      let resposta;
-      try {
-        resposta = await fetch(urlPrimaria, { ...opts, signal: controller.signal });
-      } finally {
-        clearTimeout(timer);
-      }
-      let json = null;
-      try { json = await resposta.json(); } catch (e) {}
-      if (!resposta.ok) throw new Error((json && json.erro) || "O painel não confirmou o pedido.");
-    } catch (e) {
-      mostrarToast(e.name === "AbortError"
-        ? "Servidor demorou para responder. O pedido não foi enviado; tente novamente."
-        : (e.message || "Não foi possível enviar o pedido ao painel."));
-      destravarBotaoFinalizar();
-      return;
-    }
+    // Esta edição funciona sem Render/backend: o pedido é preservado no
+    // aparelho e segue diretamente para o WhatsApp. Não há fetch obrigatório
+    // capaz de bloquear o envio por CORS, servidor suspenso ou falta de rede.
 
     // Se o pedido completo estourar o limite seguro de URL, manda só um
     // resumo pelo link (com o número do pedido e o total) e copia o texto
@@ -1858,30 +1830,20 @@
   }
 
   function abrirWhatsapp(url) {
-    // Abre a janela/aba já dentro do gesto de clique e só depois define a
-    // URL. Isso permite checar se o navegador bloqueou o pop-up: quando
-    // bloqueado, window.open retorna null (ou uma janela já fechada).
-    // Obs: não usamos a flag "noopener" aqui porque ela faz window.open
-    // sempre retornar null (mesmo com sucesso), o que impediria essa
-    // checagem. Em vez disso, zeramos manualmente a referência "opener"
-    // da nova janela, obtendo a mesma proteção sem perder a detecção.
-    let novaJanela;
+    // Sem uma espera por servidor, esta chamada continua dentro do toque do
+    // usuário. Em celulares usamos a própria aba, comportamento mais confiável
+    // no Safari/iPhone e nos navegadores internos do Instagram/WhatsApp.
     try {
-      novaJanela = window.open("", "_blank");
+      const ehCelular = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+      if (ehCelular) {
+        window.location.href = url;
+        return true;
+      }
+      const novaJanela = window.open(url, "_blank", "noopener,noreferrer");
+      return Boolean(novaJanela);
     } catch (e) {
-      novaJanela = null;
+      return false;
     }
-
-    const bloqueado = !novaJanela || novaJanela.closed || typeof novaJanela.closed === "undefined";
-    if (bloqueado) return false;
-
-    try {
-      novaJanela.opener = null;
-    } catch (e) {
-      /* alguns navegadores não deixam reatribuir opener; segue normalmente */
-    }
-    novaJanela.location.href = url;
-    return true;
   }
 
   function mostrarAvisoPopupBloqueado(url, numeroPedido) {

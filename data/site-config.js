@@ -10,10 +10,10 @@ window.SITE_CONFIG = {
   // Versão do app — só usada em logs e no aviso de "nova versão disponível"
   // (ver js/app.js, seção PWA). Suba esse número junto com CACHE_VERSION em
   // sw.js sempre que publicar uma atualização de verdade.
-  appVersion: "1.3.0",
+  appVersion: "1.4.0",
 
-  // URL da API. Vazio = mesma origem (quando o site é servido pelo backend).
-  apiBase: "https://brutu-s-delivery.onrender.com",
+  // Edição independente: pedidos enviados diretamente pelo WhatsApp.
+  apiBase: "",
 
   tema: {
     accent: "#ff5a1f",
