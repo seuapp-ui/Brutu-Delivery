@@ -1,4 +1,4 @@
-// Gerado automaticamente pelo servidor a partir de data/menu.json
+// Gerado automaticamente a partir de data/menu.json
 window.MENU_DATA = {
   "restaurante": {
     "nome": "Brutu's Delivery",
@@ -9,10 +9,11 @@ window.MENU_DATA = {
     "bannerImagemAlt": "",
     "whatsapp": "5516993319742",
     "pix": {
-      "chave": "68351127000199",
+      "chave": "",
       "tipo": "cnpj",
-      "titular": "Ana Livia Silva Ribeiro",
-      "cidade": "MORRO AGUDO"
+      "titular": "",
+      "cidade": "MORRO AGUDO",
+      "protegido": true
     },
     "taxaEntrega": 5,
     "pedidoMinimoEntrega": 0,
@@ -446,6 +447,30 @@ window.MENU_DATA = {
       "destaque": false
     },
     {
+      "id": "g009",
+      "categoria": "hamburgueres-gourmet",
+      "nome": "BRUTU'S PICKLES",
+      "descricao": "Pão macio, hambúrguer artesanal, cheddar cremoso, cebola roxa, picles crocantes e molho especial de picles.",
+      "foto": "https://placehold.co/600x450/241c17/ffb703?text=BRUTUS+PICKLES",
+      "preco": 38.9,
+      "ingredientes": [
+        "Pão macio",
+        "Hambúrguer artesanal",
+        "Cheddar cremoso",
+        "Cebola roxa",
+        "Picles crocantes",
+        "Molho especial de picles"
+      ],
+      "adicionais": [
+        "add-bacon",
+        "add-cheddar",
+        "add-ovo",
+        "add-cebola-caramelizada",
+        "add-hamburguer-extra"
+      ],
+      "destaque": true
+    },
+    {
       "id": "e001",
       "categoria": "especiais",
       "nome": "Duplo Burger Brutus",
@@ -803,17 +828,6 @@ window.MENU_DATA = {
       "destaque": false
     },
     {
-      "id": "b023",
-      "categoria": "bebidas",
-      "nome": "Guaraná Antártica 2L",
-      "descricao": "Guaraná Antártica 2L",
-      "foto": "img/produtos/guarana-1l.jpg",
-      "preco": 14,
-      "ingredientes": [],
-      "adicionais": [],
-      "destaque": false
-    },
-    {
       "id": "b007",
       "categoria": "bebidas",
       "nome": "Refrigerante Jaboti 2L",
@@ -1095,12 +1109,12 @@ window.MENU_DATA = {
       "id": "l005",
       "categoria": "lancamentos",
       "nome": "Brutu's Veggie",
-      "descricao": "Pão macio, 1 hambúrguer de catupiry empanado, muçarela e cheddar, cebola roxa, rúcula, tomate e molho da casa.",
+      "descricao": "Pão macio, 2 catupirys empanados, muçarela e cheddar, cebola roxa, rúcula, tomate e molho da casa.",
       "foto": "img/produtos/brutus-veggie.jpg",
       "preco": 38.9,
       "ingredientes": [
         "Pão macio",
-        "Catupiry empanado (1 unidade)",
+        "Catupiry empanado (2 unidades)",
         "Muçarela",
         "Cheddar",
         "Cebola roxa",
@@ -1192,11 +1206,11 @@ window.MENU_DATA = {
       "codigo": "BEMVINDO2",
       "tipo": "percentual",
       "valor": 2,
-      "minimo": 60,
+      "minimo": 40,
       "ativo": true,
       "usoMaximo": 0,
       "usos": 0,
-      "descricao": "2% de desconto em pedidos a partir de R$ 60"
+      "descricao": "2% de desconto em pedidos a partir de R$ 40"
     },
     {
       "id": "entrega5",

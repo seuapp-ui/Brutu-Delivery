@@ -14,7 +14,7 @@
    troque o número da versão abaixo.
    ========================================================================= */
 
-const CACHE_VERSION = "brutus-v5";
+const CACHE_VERSION = "brutus-v8";
 const STATIC_CACHE = `${CACHE_VERSION}-estatico`;
 const DATA_CACHE = `${CACHE_VERSION}-dados`;
 
@@ -25,7 +25,6 @@ const APP_SHELL = [
   "./js/app.js",
   "./css/roleta.css",
   "./js/roleta.js",
-  "./data/site-config.js",
   "./data/menu-data.js",
   "./manifest.json",
   "./icons/icon-192.png",
@@ -62,6 +61,21 @@ self.addEventListener("fetch", (event) => {
   if (request.method !== "GET") return;
 
   const url = new URL(request.url);
+
+  // Nunca cachear API nem painel administrativo.
+  // Isso evita painel/login antigo preso no Service Worker após um deploy.
+  if (
+    url.pathname.startsWith("/api/") ||
+    url.pathname.endsWith("/painel.html") ||
+    url.pathname.endsWith("/painel-de-controle.html")
+  ) {
+    event.respondWith(
+      fetch(request, { cache: "no-store" }).catch(() => {
+        return new Response("Offline", { status: 503, statusText: "Offline" });
+      })
+    );
+    return;
+  }
 
   // Estratégia especial para o cardápio (menu.json): network-first
   if (url.pathname.endsWith(MENU_URL_PATH) || url.pathname.endsWith("menu.json")) {

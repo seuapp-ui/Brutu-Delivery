@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: brutus-delivery
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: "24"
+      - key: ADMIN_USER
+        value: admin
+      - key: ADMIN_PASSWORD
+        generateValue: true
+      - key: ALLOWED_ORIGINS
+        value: https://brutu-s-delivery.onrender.com
+      - key: TZ
+        value: America/Sao_Paulo

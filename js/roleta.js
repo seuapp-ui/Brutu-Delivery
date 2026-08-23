@@ -16,6 +16,7 @@
     telefone: "",
     girando: false,
     rotacaoAtual: 0,
+    erroAcesso: "",
   };
 
   function $(sel, ctx = document) {
@@ -26,9 +27,30 @@
     return API_BASE() + path;
   }
 
+  const ROLETA_KEY_STORAGE = "brutus-roleta-chave:v1";
+
+  function chaveDoAparelho() {
+    try {
+      let chave = localStorage.getItem(ROLETA_KEY_STORAGE) || "";
+      if (chave.length >= 32) return chave;
+      const bytes = new Uint8Array(32);
+      crypto.getRandomValues(bytes);
+      chave = Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+      localStorage.setItem(ROLETA_KEY_STORAGE, chave);
+      return chave;
+    } catch (e) {
+      return "";
+    }
+  }
+
   async function api(path, opts = {}) {
+    const chave = chaveDoAparelho();
     const res = await fetch(apiUrl(path), {
-      headers: { "Content-Type": "application/json", ...(opts.headers || {}) },
+      headers: {
+        "Content-Type": "application/json",
+        ...(chave ? { "X-Roleta-Key": chave } : {}),
+        ...(opts.headers || {}),
+      },
       ...opts,
     });
     let data = null;
@@ -170,6 +192,14 @@
   function renderPremiosLista() {
     const lista = $("#roleta-meus-premios");
     if (!lista) return;
+    if (state.erroAcesso) {
+      lista.innerHTML = "";
+      const aviso = document.createElement("p");
+      aviso.className = "roleta-vazio";
+      aviso.textContent = state.erroAcesso;
+      lista.appendChild(aviso);
+      return;
+    }
     const disponiveis = (state.cliente && state.cliente.premiosDisponiveis) || [];
     if (!disponiveis.length) {
       lista.innerHTML = '<p class="roleta-vazio">Nenhum prêmio disponível no momento.</p>';
@@ -201,8 +231,12 @@
     }
     try {
       state.cliente = await api(`/api/roleta/cliente/${encodeURIComponent(tel)}`);
+      state.erroAcesso = "";
     } catch (e) {
       state.cliente = { giros: 0, premiosDisponiveis: [], premios: [] };
+      state.erroAcesso = e.status === 403
+        ? "Este aparelho será liberado para a roleta depois que um pedido feito nele for marcado como entregue."
+        : "Não foi possível consultar seus giros agora.";
     }
     atualizarGirosUI();
     renderPremiosLista();
@@ -313,7 +347,10 @@
     if (state.config && state.config.ativo === false) {
       $("#roleta-open-btn")?.classList.add("hidden");
       $("#roleta-overlay")?.classList.add("hidden");
-      window.BRUTUS_ROLETA = { config: () => state.config };
+      window.BRUTUS_ROLETA = {
+        config: () => state.config,
+        getChave: chaveDoAparelho,
+      };
       return;
     }
 
@@ -337,6 +374,7 @@
       open: abrirModal,
       getPremiosDisponiveis: () => (state.cliente && state.cliente.premiosDisponiveis) || [],
       getTelefone: () => state.telefone,
+      getChave: chaveDoAparelho,
       refresh: () => carregarCliente(state.telefone || carregarTelefoneLocal()),
       resgatarNoServidor: async (premioId, telefone) => {
         return api("/api/roleta/resgatar", {

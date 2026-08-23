@@ -212,10 +212,19 @@
       throw new Error("menu-data.js não encontrado");
     }
 
-    // MODO HOSPEDADO (site publicado em http/https): tenta sempre buscar a
-    // versão mais recente de menu.json; se estiver offline, usa a cópia que
-    // o Service Worker guardou no primeiro acesso (ver sw.js). Se tudo isso
-    // falhar, cai para os dados embutidos como último recurso.
+    // Preferência: API do backend (injeta PIX das variáveis de ambiente)
+    try {
+      const apiBase = (window.SITE_CONFIG && window.SITE_CONFIG.apiBase)
+        ? String(window.SITE_CONFIG.apiBase).replace(/\/$/, "")
+        : "";
+      const urlApi = (apiBase || "") + "/api/menu";
+      const respApi = await fetch(urlApi, { cache: "no-store" });
+      if (respApi.ok) return await respApi.json();
+    } catch (e) {
+      /* cai para menu.json estático */
+    }
+
+    // MODO HOSPEDADO: menu.json estático / cache / embutido
     try {
       const resp = await fetch(MENU_JSON_URL, { cache: "no-store" });
       if (!resp.ok) throw new Error("Falha ao buscar menu.json");
@@ -267,20 +276,14 @@
     state._menuPollEmAndamento = true;
 
     try {
-      console.log("[UPDATE] Verificando atualização...");
       const resp = await fetch(MENU_JSON_URL, { cache: "no-store" });
       if (!resp.ok) throw new Error("Falha ao buscar menu.json");
       const novoMenu = await resp.json();
 
       const mudou = JSON.stringify(novoMenu) !== JSON.stringify(state.menu);
-      if (!mudou) {
-        console.log("[UPDATE] Nenhuma alteração encontrada.");
-        return;
-      }
+      if (!mudou) return;
 
-      console.log("[UPDATE] Novos dados encontrados.");
       aplicarAtualizacaoMenu(novoMenu);
-      console.log("[UPDATE] Dados atualizados.");
     } catch (erro) {
       // Falha de rede/parse: mantém os dados atuais e tenta de novo no
       // próximo ciclo — nunca quebra a tela nem limpa nada do cliente.
@@ -316,37 +319,16 @@
      5. RENDERIZAÇÃO — HOME
      ===================================================================== */
   // Calcula se a loja está aberta agora e monta o texto a ser exibido no
-  // cabeçalho (ex: "Aberto agora · fecha às 23:30", "Fechado agora · abre
+  // cabeçalho (ex: "Aberto agora · fecha às 03:00", "Fechado agora · abre
   // às 18:00", "Fechado hoje"). Centraliza a lógica usada tanto pelo status
   // visual quanto pelas checagens de "pode enviar pedido".
-  // Horário SEMPRE em fuso fixo de Brasília (America/Sao_Paulo), independente
-  // do fuso/horário do dispositivo do cliente.
-  function obterPartesBrasilia() {
-    const agora = new Date();
-    const partes = Object.fromEntries(
-      new Intl.DateTimeFormat("en-US", {
-        timeZone: "America/Sao_Paulo",
-        weekday: "short",
-        hour: "2-digit",
-        minute: "2-digit",
-        hourCycle: "h23",
-      })
-        .formatToParts(agora)
-        .filter((p) => p.type !== "literal")
-        .map((p) => [p.type, p.value])
-    );
-    const mapaDia = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
-    const diaSemana = mapaDia[partes.weekday] ?? 0;
-    const hora = parseInt(partes.hour, 10) || 0;
-    const minuto = parseInt(partes.minute, 10) || 0;
-    return { diaSemana, minutosAgora: hora * 60 + minuto };
-  }
-
   function obterInfoHorario(horario) {
     if (!horario) return { aberto: true, texto: "" };
 
-    const { diaSemana, minutosAgora } = obterPartesBrasilia();
+    const agora = new Date();
+    const diaSemana = agora.getDay(); // 0=domingo ... 6=sábado
     const diaAnterior = (diaSemana + 6) % 7;
+    const minutosAgora = agora.getHours() * 60 + agora.getMinutes();
     const diasFechado = horario.diasFechado || [];
 
     // Retorna {abre, fecha} do dia informado, usando a exceção específica
@@ -1509,13 +1491,8 @@
     const r = state.menu.restaurante;
     const linhas = [];
     const agora = new Date();
-    // Horário fixo de Brasília no texto do pedido
     const dataHora = agora.toLocaleString("pt-BR", {
-      timeZone: "America/Sao_Paulo",
-      day: "2-digit",
-      month: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
+      day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit",
     });
 
     linhas.push(`🍔 *NOVO PEDIDO — ${r.nome}*`, "");
@@ -1694,7 +1671,7 @@
     }
   }
 
-  function finalizarPedido() {
+  async function finalizarPedido() {
     // Trava logo de cara: evita que um duplo clique rápido dispare o
     // envio duas vezes (duas janelas/abas do WhatsApp, duas mensagens).
     if (enviandoPedido) return;
@@ -1743,13 +1720,20 @@
     // Registro local + envio para API (quando o backend estiver no ar)
     // Se prêmio for produto grátis, inclui no pedido como item R$ 0
     let itensPedido = state.cart.map((i) => ({
+      produtoId: i.produtoId,
       nome: i.nome,
       quantidade: i.quantidade,
       preco: precoUnitarioItem(i),
+      adicionaisIds: (i.adicionais || []).map((a) => a.id),
+      adicionaisPorLancheIds: Array.isArray(i.adicionaisPorLanche)
+        ? i.adicionaisPorLanche.map((grupo) => grupo.map((a) => a.id))
+        : null,
+      observacao: i.observacao || "",
     }));
     if (state.premioRoleta && state.premioRoleta.tipo === "produto_gratis") {
       const menuProd = (state.menu.produtos || []).find((p) => p.id === state.premioRoleta.produtoId);
       itensPedido.push({
+        produtoId: state.premioRoleta.produtoId,
         nome: (menuProd && menuProd.nome) || state.premioRoleta.nome,
         quantidade: 1,
         preco: 0,
@@ -1775,17 +1759,16 @@
       formaPagamento: state.formaPagamento,
       endereco: [dadosCliente.endereco, dadosCliente.numero].filter(Boolean).join(", "),
       bairro: dadosCliente.bairro || "",
+      complemento: dadosCliente.referencia || "",
+      referencia: dadosCliente.referencia || "",
+      troco: dadosCliente.troco || "",
       observacao: dadosCliente.observacaoGeral || "",
       itens: itensPedido,
     };
 
-    // Marca prêmio como utilizado no servidor
-    if (state.premioRoleta && window.BRUTUS_ROLETA && window.BRUTUS_ROLETA.resgatarNoServidor) {
-      window.BRUTUS_ROLETA.resgatarNoServidor(
-        state.premioRoleta.id,
-        dadosCliente.telefone
-      ).catch(() => {});
-    }
+    // O prêmio é validado e consumido atomicamente pelo próprio endpoint do
+    // pedido. Não fazemos uma chamada separada que poderia gastar o prêmio
+    // antes de o pedido chegar ao servidor.
     try {
       const PEDIDOS_KEY = "brutus-pedidos:v1";
       const lista = JSON.parse(localStorage.getItem(PEDIDOS_KEY) || "[]");
@@ -1799,15 +1782,47 @@
       total: totalCarrinho(),
       dataHora: Date.now(),
     });
+    // Confirma primeiro no servidor. O WhatsApp só abre depois que o painel
+    // recebeu o pedido, evitando a falsa mensagem de sucesso.
     try {
-      const apiBase = (window.SITE_CONFIG && window.SITE_CONFIG.apiBase) ? window.SITE_CONFIG.apiBase.replace(/\/$/, "") : "";
-      // mesma origem quando o site é servido pelo backend
-      fetch(apiBase + "/api/pedidos", {
+      const apiBase = (window.SITE_CONFIG && window.SITE_CONFIG.apiBase)
+        ? String(window.SITE_CONFIG.apiBase).replace(/\/$/, "")
+        : "";
+      const chaveRoleta = window.BRUTUS_ROLETA && window.BRUTUS_ROLETA.getChave
+        ? window.BRUTUS_ROLETA.getChave()
+        : "";
+      // A chave fica apenas neste envio ao servidor; não é gravada no pedido
+      // local, mostrada no painel ou enviada ao WhatsApp.
+      const body = JSON.stringify({
+        ...snapshotPedido,
+        ...(chaveRoleta ? { roletaChave: chaveRoleta } : {}),
+      });
+      const opts = {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(snapshotPedido),
-      }).catch(() => {});
-    } catch (e) {}
+        body,
+        keepalive: true,
+        cache: "no-store",
+      };
+      const urlPrimaria = (apiBase || "") + "/api/pedidos";
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 12000);
+      let resposta;
+      try {
+        resposta = await fetch(urlPrimaria, { ...opts, signal: controller.signal });
+      } finally {
+        clearTimeout(timer);
+      }
+      let json = null;
+      try { json = await resposta.json(); } catch (e) {}
+      if (!resposta.ok) throw new Error((json && json.erro) || "O painel não confirmou o pedido.");
+    } catch (e) {
+      mostrarToast(e.name === "AbortError"
+        ? "Servidor demorou para responder. O pedido não foi enviado; tente novamente."
+        : (e.message || "Não foi possível enviar o pedido ao painel."));
+      destravarBotaoFinalizar();
+      return;
+    }
 
     // Se o pedido completo estourar o limite seguro de URL, manda só um
     // resumo pelo link (com o número do pedido e o total) e copia o texto
@@ -1930,8 +1945,6 @@
     if (location.protocol === "file:") return;
     if (!("serviceWorker" in navigator)) return;
 
-    console.log(`[VERSION] Versão atual: ${APP_VERSION}`);
-
     // Se, no momento em que essa aba carregou, JÁ existia um Service Worker
     // controlando a página, então qualquer "controllerchange" que acontecer
     // depois disso é uma atualização de verdade (uma versão nova assumiu no
@@ -1949,7 +1962,6 @@
     navigator.serviceWorker.addEventListener("controllerchange", () => {
       if (!jaTinhaControlador || atualizacaoTratada) return;
       atualizacaoTratada = true;
-      console.log("[VERSION] Nova versão do app foi ativada pelo Service Worker.");
       aplicarOuAvisarNovaVersao();
     });
 

@@ -293,6 +293,8 @@
   const KEY_NUMERO = "brutus-imprimir-pedido:numero-pedido";
   const KEY_NUMERO_DATA = "brutus-imprimir-pedido:numero-pedido-data";
   const KEY_ULTIMO = "brutus-imprimir-pedido:ultimo-pedido";
+  const KEY_IMPORTADO = "brutus-imprimir-pedido:importado-painel";
+  let pedidoImportado = null;
 
   // Mantém o texto e a preferência de largura entre uma impressão e outra.
   try {
@@ -304,6 +306,21 @@
       if (radio) radio.checked = true;
     }
   } catch (e) {}
+
+  // Quando aberta pelo painel, recebe o pedido já formatado sem expor dados
+  // na URL. Abrindo a página normalmente, continua pronta para colar do WhatsApp.
+  try {
+    const veioDoPainel = new URLSearchParams(location.search).get("origem") === "painel";
+    if (veioDoPainel) {
+      pedidoImportado = JSON.parse(localStorage.getItem(KEY_IMPORTADO) || "null");
+      if (pedidoImportado && pedidoImportado.texto) {
+        entrada.value = pedidoImportado.texto;
+        const larguraImportada = pedidoImportado.largura || "w-80";
+        const radio = document.querySelector(`input[name="largura"][value="${larguraImportada}"]`);
+        if (radio) radio.checked = true;
+      }
+    }
+  } catch (e) { pedidoImportado = null; }
 
   function escapeHtml(str) {
     return str
@@ -321,6 +338,7 @@
   // quando o pedido é realmente impresso, em confirmarNumeroUsado()).
   // Se a data salva for de um dia anterior, o contador reinicia em #0001.
   function proximoNumeroPedido() {
+    if (pedidoImportado && pedidoImportado.numero) return pedidoImportado.numero;
     let atual = 0;
     try {
       if (localStorage.getItem(KEY_NUMERO_DATA) === dataHojeISO()) {
@@ -331,6 +349,11 @@
   }
 
   function confirmarNumeroUsado(numero) {
+    if (pedidoImportado) {
+      pedidoImportado = null;
+      try { localStorage.removeItem(KEY_IMPORTADO); } catch (e) {}
+      return;
+    }
     try {
       localStorage.setItem(KEY_NUMERO, String(numero));
       localStorage.setItem(KEY_NUMERO_DATA, dataHojeISO());
@@ -505,7 +528,11 @@
 
   document.getElementById("btn-limpar").addEventListener("click", () => {
     entrada.value = "";
-    try { localStorage.removeItem(KEY_TEXTO); } catch (e) {}
+    pedidoImportado = null;
+    try {
+      localStorage.removeItem(KEY_TEXTO);
+      localStorage.removeItem(KEY_IMPORTADO);
+    } catch (e) {}
     atualizarPreview();
     entrada.focus();
   });
