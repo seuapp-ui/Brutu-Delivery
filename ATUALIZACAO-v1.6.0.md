@@ -1,5 +1,7 @@
 # Brutu's Delivery v1.6.0
 
+> Revisão v1.6.1: nomes e composição dos combos padronizados no cardápio.
+
 ## Fluxo implementado
 
 Ao finalizar, o cardápio registra o pedido na API online sem aguardar a resposta e abre o WhatsApp normalmente. Se a API falhar, o pedido fica em uma fila local e é reenviado automaticamente quando a conexão voltar. O mesmo ID é reutilizado, evitando duplicação.

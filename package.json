@@ -1,6 +1,6 @@
 {
   "name": "brutus-delivery",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "description": "Brutu's Delivery — cardápio, pedidos, painel e impressão",
   "main": "backend/server.js",
   "scripts": {

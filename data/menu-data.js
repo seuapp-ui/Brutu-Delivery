@@ -1043,7 +1043,7 @@ window.MENU_DATA = {
     {
       "id": "c008",
       "categoria": "combos",
-      "nome": "Combo Individual X Brutus Clássico",
+      "nome": "Combo Individual",
       "descricao": "1 X Brutus Clássico, batata frita 200g e 1 refrigerante 200ml ou suco 450ml.",
       "foto": "img/produtos/brutus-classico.jpg",
       "preco": 37.99,
@@ -1070,7 +1070,7 @@ window.MENU_DATA = {
     {
       "id": "c009",
       "categoria": "combos",
-      "nome": "Combo Duplo X Brutus Clássico",
+      "nome": "Combo Duplo",
       "descricao": "2 X Brutus Clássicos, batata frita 200g e 1 refrigerante 1L.",
       "foto": "img/produtos/combo-esquadrao.jpg",
       "preco": 69.99,
@@ -1092,7 +1092,7 @@ window.MENU_DATA = {
     {
       "id": "c010",
       "categoria": "combos",
-      "nome": "Combo Família X Brutus Clássico",
+      "nome": "Combo Família",
       "descricao": "3 X Brutus Clássicos, batata frita 400g e 1 refrigerante 2L.",
       "foto": "img/produtos/combo-familia-brutus.jpg",
       "preco": 99.99,
