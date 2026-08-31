@@ -14,7 +14,7 @@ npm start
 Abre em:
 
 - Cardápio: http://localhost:3000/
-- Painel: http://localhost:3000/painel de controle.html
+- Painel: http://localhost:3000/painel.html
 - Login padrão: **admin** / **5625** (arquivo `data/auth.json`)
 
 ## O que a API faz

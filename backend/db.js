@@ -51,6 +51,9 @@ function abrir() {
   criarTabelas();
   migrarJsonSeNecessario();
   aplicarAtualizacoesCatalogo();
+  aplicarAtualizacaoCardapio151();
+  aplicarAtualizacaoCardapio152();
+  aplicarAtualizacaoCardapio153();
   invalidarCredenciaisLegadas();
   return db;
 }
@@ -72,6 +75,65 @@ function aplicarAtualizacoesCatalogo() {
       if (produto && !ids.has(id)) menu.produtos.push(produto);
     }
     db.prepare("INSERT OR REPLACE INTO config (chave, valor) VALUES (?, ?)").run("menu", JSON.stringify(menu));
+  }
+  db.prepare("INSERT OR REPLACE INTO meta (chave, valor) VALUES (?, ?)").run(revisao, "1");
+}
+
+function aplicarAtualizacaoCardapio151() {
+  const revisao = "catalogo-1.5.1-frango-categorias";
+  const pronta = db.prepare("SELECT valor FROM meta WHERE chave = ?").get(revisao);
+  if (pronta?.valor === "1") return;
+  const seed = lerJsonArquivo(path.join(__dirname, "..", "data", "menu.json"), null);
+  const row = db.prepare("SELECT valor FROM config WHERE chave = ?").get("menu");
+  let atual = null;
+  try { atual = row ? JSON.parse(row.valor) : null; } catch {}
+  if (seed && atual && Array.isArray(seed.produtos) && Array.isArray(atual.produtos)) {
+    atual.categorias = seed.categorias;
+    const idsAtualizar = new Set(["l001", "l002", "l003", "l004", "l005", "l006", "b015", "b016", "f001", "f002", "f003"]);
+    const atualPorId = new Map(atual.produtos.map((p) => [String(p.id), p]));
+    for (const produto of seed.produtos) {
+      if (idsAtualizar.has(String(produto.id))) atualPorId.set(String(produto.id), produto);
+    }
+    atual.produtos = [...atualPorId.values()].map((p) => ({
+      ...p,
+      lancamento: p.categoria === "lancamentos" ? false : p.lancamento,
+      categoria: p.categoria === "lancamentos" ? "especiais" : p.categoria,
+    }));
+    db.prepare("INSERT OR REPLACE INTO config (chave, valor) VALUES (?, ?)").run("menu", JSON.stringify(atual));
+  }
+  db.prepare("INSERT OR REPLACE INTO meta (chave, valor) VALUES (?, ?)").run(revisao, "1");
+}
+
+function aplicarAtualizacaoCardapio152() {
+  const revisao = "catalogo-1.5.2-combos-classico";
+  const pronta = db.prepare("SELECT valor FROM meta WHERE chave = ?").get(revisao);
+  if (pronta?.valor === "1") return;
+  const seed = lerJsonArquivo(path.join(__dirname, "..", "data", "menu.json"), null);
+  const row = db.prepare("SELECT valor FROM config WHERE chave = ?").get("menu");
+  let atual = null;
+  try { atual = row ? JSON.parse(row.valor) : null; } catch {}
+  if (seed && atual && Array.isArray(seed.produtos) && Array.isArray(atual.produtos)) {
+    const ids = new Set(["c008", "c009", "c010"]);
+    const atualPorId = new Map(atual.produtos.map((p) => [String(p.id), p]));
+    for (const produto of seed.produtos) {
+      if (ids.has(String(produto.id))) atualPorId.set(String(produto.id), produto);
+    }
+    atual.produtos = [...atualPorId.values()];
+    db.prepare("INSERT OR REPLACE INTO config (chave, valor) VALUES (?, ?)").run("menu", JSON.stringify(atual));
+  }
+  db.prepare("INSERT OR REPLACE INTO meta (chave, valor) VALUES (?, ?)").run(revisao, "1");
+}
+
+function aplicarAtualizacaoCardapio153() {
+  const revisao = "catalogo-1.5.3-endereco-retirada";
+  const pronta = db.prepare("SELECT valor FROM meta WHERE chave = ?").get(revisao);
+  if (pronta?.valor === "1") return;
+  const row = db.prepare("SELECT valor FROM config WHERE chave = ?").get("menu");
+  let atual = null;
+  try { atual = row ? JSON.parse(row.valor) : null; } catch {}
+  if (atual && atual.restaurante) {
+    atual.restaurante.enderecoRetirada = "Rua Seis de Janeiro, 806 - Em frente ao Pé na Areia";
+    db.prepare("INSERT OR REPLACE INTO config (chave, valor) VALUES (?, ?)").run("menu", JSON.stringify(atual));
   }
   db.prepare("INSERT OR REPLACE INTO meta (chave, valor) VALUES (?, ?)").run(revisao, "1");
 }
@@ -383,6 +445,37 @@ function infoDb() {
   };
 }
 
+function criarBackup(diretorio, motivo = "automatico") {
+  abrir();
+  const pasta = path.resolve(String(diretorio || path.join(path.dirname(DB_PATH), "backups")));
+  fs.mkdirSync(pasta, { recursive: true });
+  const data = new Date().toISOString().replace(/[:.]/g, "-");
+  const nomeSeguro = String(motivo).replace(/[^a-z0-9_-]/gi, "-").slice(0, 30) || "backup";
+  const arquivo = path.join(pasta, `brutus-${data}-${nomeSeguro}.db`);
+  const sqlPath = arquivo.replace(/'/g, "''");
+  db.exec(`VACUUM INTO '${sqlPath}'`);
+  return { nome: path.basename(arquivo), caminho: arquivo, tamanho: fs.statSync(arquivo).size, criadoEm: Date.now() };
+}
+
+function listarBackups(diretorio) {
+  const pasta = path.resolve(String(diretorio || path.join(path.dirname(DB_PATH), "backups")));
+  if (!fs.existsSync(pasta)) return [];
+  return fs.readdirSync(pasta)
+    .filter((nome) => /^brutus-.*\.db$/i.test(nome))
+    .map((nome) => {
+      const arquivo = path.join(pasta, nome);
+      const stat = fs.statSync(arquivo);
+      return { nome, caminho: arquivo, tamanho: stat.size, criadoEm: stat.mtimeMs };
+    })
+    .sort((a, b) => b.criadoEm - a.criadoEm);
+}
+
+function limparBackupsAntigos(diretorio, manter = 30) {
+  const lista = listarBackups(diretorio);
+  for (const item of lista.slice(Math.max(1, Number(manter) || 30))) fs.unlinkSync(item.caminho);
+  return listarBackups(diretorio);
+}
+
 
 /* ---------- SESSÕES ---------- */
 const SESSAO_DURACAO_MS = 12 * 60 * 60 * 1000; // 12 horas
@@ -445,6 +538,9 @@ module.exports = {
   lerMenu,
   salvarMenu,
   infoDb,
+  criarBackup,
+  listarBackups,
+  limparBackupsAntigos,
   DB_PATH,
   criarSessao,
   validarSessao,

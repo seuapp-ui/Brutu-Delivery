@@ -26,11 +26,25 @@ const PORT = process.env.PORT || 3000;
 const ROOT = path.join(__dirname, "..");
 const MENU_FILE = path.join(ROOT, "data", "menu.json");
 const MENU_DATA_JS = path.join(ROOT, "data", "menu-data.js");
+const BACKUP_DIR = path.resolve(process.env.BRUTUS_BACKUP_DIR || path.join(path.dirname(store.DB_PATH), "backups"));
 
 // Abre o SQLite na subida (migra JSON antigos se existirem)
 store.abrir();
 console.log(`[auth] ADMIN_PASSWORD encontrada: ${String(process.env.ADMIN_PASSWORD || "").trim().length > 0 ? "SIM" : "NÃO (usando SQLite)"}`);
 console.log(`[auth] Usuário do ambiente: ${String(process.env.ADMIN_USER || "").trim() || "não definido (usa usuário do SQLite)"}`);
+
+function executarBackupAutomatico(motivo) {
+  try {
+    const backup = store.criarBackup(BACKUP_DIR, motivo);
+    store.limparBackupsAntigos(BACKUP_DIR, 30);
+    console.log(`[backup] Criado: ${backup.nome}`);
+  } catch (e) {
+    console.warn(`[backup] Falha no backup ${motivo}: ${e.message}`);
+  }
+}
+
+setImmediate(() => executarBackupAutomatico("inicializacao"));
+setInterval(() => executarBackupAutomatico("diario"), 24 * 60 * 60 * 1000).unref();
 
 const app = express();
 
@@ -52,7 +66,17 @@ if (String(process.env.ALLOW_LOCAL_ORIGINS || "").toLowerCase() === "true") {
 
 function origemPermitida(origem) {
   if (!origem) return true; // navegação normal, curl, monitor do Render etc.
-  return origensPermitidas.has(String(origem).replace(/\/$/, ""));
+  const normalizada = String(origem).replace(/\/$/, "");
+  if (origensPermitidas.has(normalizada)) return true;
+  if (String(process.env.ALLOW_LAN_ORIGINS || "").toLowerCase() === "true") {
+    try {
+      const host = new URL(normalizada).hostname;
+      return host === "localhost" || host === "127.0.0.1" ||
+        /^10\./.test(host) || /^192\.168\./.test(host) ||
+        /^172\.(1[6-9]|2\d|3[01])\./.test(host);
+    } catch {}
+  }
+  return false;
 }
 
 // Rejeita a origem antes de executar a rota. Assim o CORS não é apenas uma
@@ -93,7 +117,7 @@ app.use((req, res, next) => {
     "form-action 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; " +
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
     "font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; " +
-    "connect-src 'self'"
+    `connect-src 'self' ${ORIGEM_PRODUCAO}`
   );
   next();
 });
@@ -223,6 +247,7 @@ function limitar({ janelaMs, max, chave }) {
 setInterval(() => {
   const limite = Date.now() - 60 * 60 * 1000;
   for (const [k, v] of limites) if (v.inicio < limite) limites.delete(k);
+  for (const [k, v] of loginTentativas) if (v.inicio < limite) loginTentativas.delete(k);
 }, 15 * 60 * 1000).unref();
 
 function regenerarMenuDataJs(menu) {
@@ -293,7 +318,7 @@ app.post("/api/auth/login", (req, res) => {
 
     // Diagnóstico seguro: não registra a senha, apenas informa o motivo da recusa.
     if (!loginOk) {
-      console.warn(`[auth] Login recusado via Environment | usuario=${usuarioRecebido || "(vazio)"} | usuarioOk=${usuarioRecebido === usuarioAmbiente ? "SIM" : "NÃO"} | tamanhoSenhaRecebida=${senhaRecebida.length} | tamanhoSenhaEsperada=${senhaAmbiente.length} | senhaOk=${senhaRecebida === senhaAmbiente ? "SIM" : "NÃO"}`);
+      console.warn("[auth] Login recusado via Environment.");
     }
     usuarioLogado = usuarioAmbiente;
   } else {
@@ -309,7 +334,7 @@ app.post("/api/auth/login", (req, res) => {
   }
 
   if (!loginOk) {
-    console.warn(`[auth] LOGIN RECUSADO | metodo=${usandoSenhaAmbiente ? "ENV" : "SQLITE"} | usuario=${usuarioRecebido || "(vazio)"}`);
+    console.warn(`[auth] Login recusado | método=${usandoSenhaAmbiente ? "ENV" : "SQLITE"}.`);
     return res.status(401).json({ erro: "Usuário ou senha incorretos." });
   }
 
@@ -356,10 +381,8 @@ app.put("/api/auth/senha", exigirAuth, (req, res) => {
   }
   const auth = lerAuth();
   // Exige senha atual para trocar (exceto se ainda estiver em texto puro legado e coincidir)
-  if (senhaAtual != null && senhaAtual !== "") {
-    if (!verificarSenha(senhaAtual, auth.senha)) {
-      return res.status(401).json({ erro: "Senha atual incorreta." });
-    }
+  if (!senhaAtual || !verificarSenha(senhaAtual, auth.senha)) {
+    return res.status(401).json({ erro: "A senha atual é obrigatória e deve estar correta." });
   }
   auth.usuario = String(usuario).trim();
   auth.senha = hashSenha(senha);
@@ -1095,25 +1118,26 @@ function concederGiroPorPedidoEntregue(pedido) {
 
 /* ---------- health ---------- */
 app.get("/api/health", (req, res) => {
-  const mem = process.memoryUsage();
-  let banco = null;
-  try {
-    banco = store.infoDb();
-  } catch (e) {
-    banco = { tipo: "sqlite", erro: e.message };
-  }
   res.json({
     ok: true,
-    versao: "1.0.1",
+    versao: "1.6.1",
     ts: Date.now(),
-    armazenamento: banco ? { tipo: banco.tipo, pedidos: banco.pedidos, clientes: banco.clientes } : null,
-    memoria: {
-      rssMB: Math.round(mem.rss / 1024 / 1024),
-      heapUsadoMB: Math.round(mem.heapUsed / 1024 / 1024),
-      heapTotalMB: Math.round(mem.heapTotal / 1024 / 1024),
-      externalMB: Math.round(mem.external / 1024 / 1024),
-    },
   });
+});
+
+app.get("/api/backups", exigirAuth, (req, res) => {
+  res.json(store.listarBackups(BACKUP_DIR).map(({ caminho, ...item }) => item));
+});
+
+app.post("/api/backups", exigirAuth, (req, res) => {
+  try {
+    const backup = store.criarBackup(BACKUP_DIR, "manual");
+    store.limparBackupsAntigos(BACKUP_DIR, 30);
+    const { caminho, ...seguro } = backup;
+    res.status(201).json({ ok: true, backup: seguro });
+  } catch (e) {
+    res.status(500).json({ erro: "Não foi possível criar o backup." });
+  }
 });
 
 /* ---------- bloqueia acesso público à pasta backend/ ----------
