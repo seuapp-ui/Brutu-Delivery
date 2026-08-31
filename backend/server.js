@@ -1120,7 +1120,7 @@ function concederGiroPorPedidoEntregue(pedido) {
 app.get("/api/health", (req, res) => {
   res.json({
     ok: true,
-    versao: "1.6.1",
+    versao: "1.6.2",
     ts: Date.now(),
   });
 });
