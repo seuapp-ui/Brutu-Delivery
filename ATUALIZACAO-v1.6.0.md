@@ -1,6 +1,6 @@
 # Brutu's Delivery v1.6.0
 
-> Revisão v1.6.1: nomes e composição dos combos padronizados no cardápio.
+> Revisão v1.6.2: nomes e composição dos combos padronizados, incluindo bacon em todos os X Brutus Clássicos dos combos.
 
 ## Fluxo implementado
 

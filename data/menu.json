@@ -1043,12 +1043,12 @@
       "id": "c008",
       "categoria": "combos",
       "nome": "Combo Individual",
-      "descricao": "1 X Brutus Clássico, batata frita 200g e 1 refrigerante 200ml ou suco 450ml.",
+      "descricao": "1 X Brutus Clássico com bacon, batata 200g e 1 refrigerante 200ml ou suco 450ml.",
       "foto": "img/produtos/brutus-classico.jpg",
       "preco": 37.99,
       "ingredientes": [
-        "1x X Brutus Clássico",
-        "1x Batata frita 200g",
+        "1x X Brutus Clássico com bacon",
+        "1x Batata 200g",
         "1x Refrigerante 200ml ou Suco 450ml"
       ],
       "adicionais": [
@@ -1070,12 +1070,12 @@
       "id": "c009",
       "categoria": "combos",
       "nome": "Combo Duplo",
-      "descricao": "2 X Brutus Clássicos, batata frita 200g e 1 refrigerante 1L.",
+      "descricao": "2 X Brutus Clássicos com bacon, batata 200g e 1 refrigerante 1L.",
       "foto": "img/produtos/combo-esquadrao.jpg",
       "preco": 69.99,
       "ingredientes": [
-        "2x X Brutus Clássico",
-        "1x Batata frita 200g",
+        "2x X Brutus Clássico com bacon",
+        "1x Batata 200g",
         "1x Refrigerante 1L"
       ],
       "adicionais": [
@@ -1092,12 +1092,12 @@
       "id": "c010",
       "categoria": "combos",
       "nome": "Combo Família",
-      "descricao": "3 X Brutus Clássicos, batata frita 400g e 1 refrigerante 2L.",
+      "descricao": "3 X Brutus Clássicos com bacon, batata 400g e 1 refrigerante 2L.",
       "foto": "img/produtos/combo-familia-brutus.jpg",
       "preco": 99.99,
       "ingredientes": [
-        "3x X Brutus Clássico",
-        "1x Batata frita 400g",
+        "3x X Brutus Clássico com bacon",
+        "1x Batata 400g",
         "1x Refrigerante 2L"
       ],
       "adicionais": [
