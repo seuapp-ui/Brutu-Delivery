@@ -44,3 +44,15 @@ test("cardápio salvo permanece disponível", () => {
   banco.salvarMenu(menu);
   assert.equal(banco.lerMenu().restaurante.tempoEstimado, "teste");
 });
+
+test("backup SQLite consistente pode ser criado e listado", () => {
+  const destino = path.join(pasta, "backups");
+  const backup = banco.criarBackup(destino, "teste");
+  assert.ok(fs.existsSync(backup.caminho));
+  assert.ok(backup.tamanho > 0);
+  assert.equal(banco.listarBackups(destino)[0].nome, backup.nome);
+  const { DatabaseSync } = require("node:sqlite");
+  const copia = new DatabaseSync(backup.caminho, { readOnly: true });
+  assert.equal(copia.prepare("PRAGMA integrity_check").get().integrity_check, "ok");
+  copia.close();
+});

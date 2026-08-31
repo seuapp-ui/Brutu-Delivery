@@ -1,9 +1,8 @@
 /* =========================================================================
    BRUTU'S DELIVERY — app.js
    -------------------------------------------------------------------------
-   Aplicativo 100% client-side. Sem login, sem cadastro, sem backend.
-   Todo o cardápio vem de /data/menu.json — para atualizar preços, fotos,
-   produtos ou o número de WhatsApp, basta editar esse arquivo.
+   Cardápio público com envio independente para a API online e WhatsApp.
+   Se a API estiver indisponível, o WhatsApp continua funcionando.
 
    Estrutura deste arquivo (procure pelos comentários "SEÇÃO"):
      1. CONFIG / CONSTANTES
@@ -37,6 +36,7 @@
   // usado só para conveniência do cliente (ex: "pedir de novo"). Não é o
   // histórico completo de pedidos (isso já existe em "brutus-pedidos:v1").
   const LAST_ORDER_STORAGE_KEY = "brutus-delivery:ultimo-pedido:v1";
+  const PENDING_ORDERS_STORAGE_KEY = "brutus-delivery:pedidos-pendentes:v1";
 
   // Versão do app — usada só em logs (ver seção 10, PWA) para identificar
   // qual build está rodando. Para forçar arquivos estáticos (css/js) a
@@ -91,6 +91,12 @@
     return valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
   }
 
+  function escaparHtml(valor) {
+    return String(valor == null ? "" : valor).replace(/[&<>"']/g, (c) => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+    })[c]);
+  }
+
   // Arredonda para centavos (2 casas decimais) evitando erros clássicos de
   // ponto flutuante do JavaScript (ex: 77.7 - 6 pode virar 71.69999999999999).
   // Usado em qualquer comparação/soma de dinheiro que não passe direto pelo
@@ -128,14 +134,21 @@
 
   function salvarDadosCliente(dados) {
     try {
-      localStorage.setItem(CUSTOMER_STORAGE_KEY, JSON.stringify(dados));
+      localStorage.setItem(CUSTOMER_STORAGE_KEY, JSON.stringify({ ...dados, _salvoEm: Date.now() }));
     } catch (e) { /* silencioso — recurso de conveniência, não crítico */ }
   }
 
   function carregarDadosCliente() {
     try {
       const raw = localStorage.getItem(CUSTOMER_STORAGE_KEY);
-      return raw ? JSON.parse(raw) : null;
+      if (!raw) return null;
+      const dados = JSON.parse(raw);
+      const validade = 90 * 24 * 60 * 60 * 1000;
+      if (dados._salvoEm && Date.now() - dados._salvoEm > validade) {
+        localStorage.removeItem(CUSTOMER_STORAGE_KEY);
+        return null;
+      }
+      return dados;
     } catch (e) {
       return null;
     }
@@ -440,7 +453,7 @@
       chip.type = "button";
       chip.dataset.categoria = cat.id;
       chip.setAttribute("aria-current", cat.id === state.categoriaAtiva ? "true" : "false");
-      chip.innerHTML = `<span class="chip-icon">${cat.icone}</span><span>${cat.nome}</span>`;
+      chip.innerHTML = `<span class="chip-icon">${escaparHtml(cat.icone)}</span><span>${escaparHtml(cat.nome)}</span>`;
       chip.addEventListener("click", () => {
         const alvo = document.getElementById(`categoria-${cat.id}`);
         if (alvo) alvo.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -471,9 +484,9 @@
       card.setAttribute("aria-label", `${produto.nome}, ${formatarPreco(produto.preco)}`);
       card.innerHTML = `
         <div class="destaque-photo">
-          <img src="${produto.foto}" alt="${produto.nome}" loading="lazy">
+          <img src="${escaparHtml(produto.foto)}" alt="${escaparHtml(produto.nome)}" loading="lazy">
         </div>
-        <div class="destaque-nome">${produto.nome}</div>
+        <div class="destaque-nome">${escaparHtml(produto.nome)}</div>
         <div class="destaque-preco">${formatarPreco(produto.preco)}</div>
       `;
       const abrir = () => abrirModalProduto(produto);
@@ -526,9 +539,9 @@
       if (produtosDaCategoria.length === 0) return;
 
       const secao = document.createElement("section");
-      secao.id = `categoria-${cat.id}`;
+      secao.id = `categoria-${String(cat.id).replace(/[^a-z0-9_-]/gi, "-")}`;
       secao.innerHTML = `
-        <h2 class="section-title"><span class="selo" aria-hidden="true">${cat.icone}</span>${cat.nome}</h2>
+        <h2 class="section-title"><span class="selo" aria-hidden="true">${escaparHtml(cat.icone)}</span>${escaparHtml(cat.nome)}</h2>
         <div class="product-grid"></div>
       `;
       const grid = $(".product-grid", secao);
@@ -556,15 +569,15 @@
       <div class="product-photo">
         ${produto.destaque ? `<span class="badge-destaque selo">TOP</span>` : ""}
         ${produto.lancamento ? `<span class="badge-lancamento">🆕 Novo</span>` : ""}
-        <img src="${produto.foto}" alt="${produto.nome}" loading="lazy">
+        <img src="${escaparHtml(produto.foto)}" alt="${escaparHtml(produto.nome)}" loading="lazy">
       </div>
       <div class="product-info">
-        <div class="product-name">${produto.nome}</div>
-        <div class="product-desc">${produto.descricao}</div>
+        <div class="product-name">${escaparHtml(produto.nome)}</div>
+        <div class="product-desc">${escaparHtml(produto.descricao)}</div>
         <div class="product-bottom">
           <span class="product-price">${formatarPreco(produto.preco)}</span>
           ${semAdicionais
-            ? `<button type="button" class="btn-add-mini" data-quick-add aria-label="Adicionar 1x ${produto.nome} direto na sacola">+</button>`
+            ? `<button type="button" class="btn-add-mini" data-quick-add aria-label="Adicionar 1x ${escaparHtml(produto.nome)} direto na sacola">+</button>`
             : `<span class="btn-add-mini" aria-hidden="true">+</span>`}
         </div>
       </div>
@@ -704,7 +717,7 @@
           row.innerHTML = `
             <div class="addon-check">
               <span class="radio" role="radio" aria-checked="${marcado}" data-addon-id="${def.id}" tabindex="0"></span>
-              <span class="addon-label">${def.nome}</span>
+              <span class="addon-label">${escaparHtml(def.nome)}</span>
             </div>
             <span class="addon-price">${def.preco ? "+ " + formatarPreco(def.preco) : "Grátis"}</span>
           `;
@@ -734,7 +747,7 @@
             <span class="checkbox" role="checkbox" aria-checked="${marcado}" data-addon-id="${def.id}" tabindex="0">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#1a0e07" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
             </span>
-            <span class="addon-label">${def.nome}</span>
+            <span class="addon-label">${escaparHtml(def.nome)}</span>
           </div>
           <span class="addon-price">+ ${formatarPreco(def.preco)}</span>
         `;
@@ -951,8 +964,8 @@
       </label>
       ${premios.map((p) => `
         <label class="premio-checkout-opt ${selectedId === p.id ? "selected" : ""}">
-          <input type="radio" name="premio-roleta" value="${p.id}" ${selectedId === p.id ? "checked" : ""}>
-          <span>${p.icone || "🎁"} ${p.nome}</span>
+          <input type="radio" name="premio-roleta" value="${escaparHtml(p.id)}" ${selectedId === p.id ? "checked" : ""}>
+          <span>${escaparHtml(p.icone || "🎁")} ${escaparHtml(p.nome)}</span>
         </label>
       `).join("")}
     `;
@@ -1055,7 +1068,7 @@
       return;
     }
 
-    const listaItens = ultimo.itens.map((i) => `${i.quantidade}x ${i.nome}`).join(", ");
+    const listaItens = ultimo.itens.map((i) => `${Number(i.quantidade) || 1}x ${escaparHtml(i.nome)}`).join(", ");
     container.innerHTML = `
       <div class="ultimo-pedido-sugestao">
         <strong>Pedir de novo?</strong>
@@ -1117,25 +1130,25 @@
       el.className = "cart-item";
       const adicionaisTxt = item.adicionaisPorLanche
         ? item.adicionaisPorLanche
-            .map((grupo, i) => (grupo.length ? `Lanche ${i + 1}: ${grupo.map((a) => a.nome).join(", ")}` : null))
+            .map((grupo, i) => (grupo.length ? `Lanche ${i + 1}: ${grupo.map((a) => escaparHtml(a.nome)).join(", ")}` : null))
             .filter(Boolean)
             .join("<br>")
-        : item.adicionais.map((a) => `+ ${a.nome}`).join("<br>");
+        : item.adicionais.map((a) => `+ ${escaparHtml(a.nome)}`).join("<br>");
       el.innerHTML = `
         <span class="cart-item-qty">${item.quantidade}x</span>
         <div class="cart-item-info">
-          <div class="cart-item-name">${item.nome}</div>
+          <div class="cart-item-name">${escaparHtml(item.nome)}</div>
           ${adicionaisTxt ? `<div class="cart-item-addons">${adicionaisTxt}</div>` : ""}
-          ${item.observacao ? `<div class="cart-item-obs">Obs: ${item.observacao}</div>` : ""}
+          ${item.observacao ? `<div class="cart-item-obs">Obs: ${escaparHtml(item.observacao)}</div>` : ""}
         </div>
         <div class="cart-item-side">
           <span class="cart-item-price">${formatarPreco(precoUnitarioItem(item) * item.quantidade)}</span>
           <div class="mini-stepper">
-            <button class="mini-qty-btn" type="button" data-action="menos" aria-label="Diminuir quantidade de ${item.nome}">−</button>
+            <button class="mini-qty-btn" type="button" data-action="menos" aria-label="Diminuir quantidade de ${escaparHtml(item.nome)}">−</button>
             <span class="mini-qty-value">${item.quantidade}</span>
-            <button class="mini-qty-btn" type="button" data-action="mais" aria-label="Aumentar quantidade de ${item.nome}">+</button>
+            <button class="mini-qty-btn" type="button" data-action="mais" aria-label="Aumentar quantidade de ${escaparHtml(item.nome)}">+</button>
           </div>
-          <button class="cart-item-remove" data-uid="${item.uid}" type="button">remover</button>
+          <button class="cart-item-remove" data-uid="${escaparHtml(item.uid)}" type="button">remover</button>
         </div>
       `;
       $(".cart-item-remove", el).addEventListener("click", () => removerDoCarrinho(item.uid));
@@ -1479,12 +1492,60 @@
   /* =====================================================================
      9. MONTAGEM DA MENSAGEM E ENVIO PARA O WHATSAPP
      ===================================================================== */
-  // Gera um número curto de pedido (ex: "A3F9K") a partir do timestamp atual.
-  // Serve só para o lojista conseguir diferenciar dois pedidos que chegarem
-  // quase juntos no WhatsApp — não é um ID de banco de dados, é só uma
-  // etiqueta legível gerada na hora, no próprio navegador do cliente.
+  // Número legível compartilhado entre API, painel, impressão e WhatsApp.
   function gerarNumeroPedido() {
-    return Date.now().toString(36).toUpperCase().slice(-5);
+    const agora = new Date();
+    const data = [agora.getFullYear(), String(agora.getMonth() + 1).padStart(2, "0"), String(agora.getDate()).padStart(2, "0")].join("");
+    const sequencia = String((Date.now() % 10000)).padStart(4, "0");
+    return `BRU-${data}-${sequencia}`;
+  }
+
+  function apiPedidosBase() {
+    const cfg = window.SITE_CONFIG || {};
+    return String(cfg.onlineApiBase || cfg.apiBase || "").replace(/\/$/, "");
+  }
+
+  function lerPedidosPendentes() {
+    try { return JSON.parse(localStorage.getItem(PENDING_ORDERS_STORAGE_KEY) || "[]"); }
+    catch (e) { return []; }
+  }
+
+  function salvarPedidosPendentes(lista) {
+    try { localStorage.setItem(PENDING_ORDERS_STORAGE_KEY, JSON.stringify(lista.slice(-20))); } catch (e) {}
+  }
+
+  async function enviarPedidoOnline(pedido, avisarFalha = true) {
+    const base = apiPedidosBase();
+    if (!base && window.location.protocol === "file:") return false;
+    try {
+      const res = await fetch(base + "/api/pedidos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(pedido),
+        keepalive: true,
+      });
+      if (!res.ok) throw new Error("API HTTP " + res.status);
+      salvarPedidosPendentes(lerPedidosPendentes().filter((p) => p.id !== pedido.id));
+      return true;
+    } catch (e) {
+      if (avisarFalha) mostrarToast("Pedido não sincronizou agora, mas o WhatsApp continua funcionando.", 4200);
+      return false;
+    }
+  }
+
+  function registrarPedidoOnlineSemBloquearWhatsapp(pedido) {
+    const pendentes = lerPedidosPendentes().filter((p) => p.id !== pedido.id);
+    pendentes.push(pedido);
+    salvarPedidosPendentes(pendentes);
+    // Não aguardamos: mantém a abertura do WhatsApp dentro do toque do cliente.
+    void enviarPedidoOnline(pedido, true);
+  }
+
+  async function sincronizarPedidosPendentes() {
+    if (!navigator.onLine) return;
+    for (const pedido of lerPedidosPendentes()) {
+      await enviarPedidoOnline(pedido, false);
+    }
   }
 
   function montarMensagemPedido(dadosCliente, numeroPedido) {
@@ -1607,6 +1668,7 @@
   }
 
   let enviandoPedido = false;
+  let tentativaFinalizacaoAtual = null;
 
   function travarBotaoFinalizar() {
     enviandoPedido = true;
@@ -1650,6 +1712,7 @@
     // aberto e o cliente confirmou que viu o aviso de que ainda precisa
     // tocar em "Enviar" por lá.
     state.cart = [];
+    tentativaFinalizacaoAtual = null;
     salvarCart();
     renderCartBar();
     esconderAvisoPopupBloqueado();
@@ -1722,7 +1785,14 @@
     };
     salvarDadosCliente(dadosCliente);
 
-    const numeroPedido = gerarNumeroPedido();
+    if (!tentativaFinalizacaoAtual) {
+      tentativaFinalizacaoAtual = {
+        id: "p-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 8),
+        numero: gerarNumeroPedido(),
+        ts: Date.now(),
+      };
+    }
+    const numeroPedido = tentativaFinalizacaoAtual.numero;
     const mensagem = montarMensagemPedido(dadosCliente, numeroPedido);
     ultimoPedidoTextoCompleto = mensagem;
     ultimoNumeroPedido = numeroPedido;
@@ -1752,9 +1822,9 @@
     }
 
     const snapshotPedido = {
-      id: "p-" + Date.now().toString(36),
+      id: tentativaFinalizacaoAtual.id,
       numero: numeroPedido,
-      ts: Date.now(),
+      ts: tentativaFinalizacaoAtual.ts,
       status: "recebido",
       total: totalCarrinho(),
       subtotal: subtotalCarrinho(),
@@ -1783,7 +1853,9 @@
       const PEDIDOS_KEY = "brutus-pedidos:v1";
       const lista = JSON.parse(localStorage.getItem(PEDIDOS_KEY) || "[]");
       lista.unshift(snapshotPedido);
-      localStorage.setItem(PEDIDOS_KEY, JSON.stringify(lista.slice(0, 500)));
+      const limiteData = Date.now() - 90 * 24 * 60 * 60 * 1000;
+      const recentes = lista.filter((p) => Number(p.ts) >= limiteData).slice(0, 50);
+      localStorage.setItem(PEDIDOS_KEY, JSON.stringify(recentes));
     } catch (e) {}
     salvarUltimoPedido({
       numero: numeroPedido,
@@ -1792,9 +1864,9 @@
       total: totalCarrinho(),
       dataHora: Date.now(),
     });
-    // Esta edição funciona sem Render/backend: o pedido é preservado no
-    // aparelho e segue diretamente para o WhatsApp. Não há fetch obrigatório
-    // capaz de bloquear o envio por CORS, servidor suspenso ou falta de rede.
+    // Registra em paralelo, sem esperar pelo servidor. O mesmo ID é reutilizado
+    // em cliques repetidos e no reenvio da fila, impedindo pedido fantasma.
+    registrarPedidoOnlineSemBloquearWhatsapp(snapshotPedido);
 
     // Se o pedido completo estourar o limite seguro de URL, manda só um
     // resumo pelo link (com o número do pedido e o total) e copia o texto
@@ -1927,7 +1999,10 @@
       aplicarOuAvisarNovaVersao();
     });
 
-    window.addEventListener("online", () => mostrarOfflineBanner(false));
+    window.addEventListener("online", () => {
+      mostrarOfflineBanner(false);
+      void sincronizarPedidosPendentes();
+    });
     window.addEventListener("offline", () => mostrarOfflineBanner(true));
   }
 
@@ -2097,6 +2172,9 @@
     registrarServiceWorker();
     atualizarPix();
     iniciarAtualizacaoAutomatica();
+    // Reenvia silenciosamente pedidos que ficaram na fila por queda da API.
+    // O backend usa o ID original, portanto essa retomada não duplica pedido.
+    void sincronizarPedidosPendentes();
 
     $("#loading-screen").classList.add("hidden");
     $("#app").classList.remove("hidden");

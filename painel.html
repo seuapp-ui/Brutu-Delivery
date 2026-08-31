@@ -5007,7 +5007,9 @@ a{ color:inherit; }
   /* ---------- Login seguro (sessão no servidor) ---------- */
   (function () {
     const CFG = window.SITE_CONFIG || {};
-    const API_BASE = (CFG.apiBase || "").replace(/\/$/, "");
+    // O painel instalado abre uma conexão de saída com o servidor online.
+    // Nenhum segredo administrativo é embutido no HTML.
+    const API_BASE = (CFG.onlineApiBase || CFG.apiBase || "").replace(/\/$/, "");
     const KEY_SESSAO = "brutus-painel:autenticado";
     const KEY_TOKEN = "brutus-painel:token";
     const KEY_USER = "brutus-painel:usuario";

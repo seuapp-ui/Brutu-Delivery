@@ -18,7 +18,7 @@ window.MENU_DATA = {
     "taxaEntrega": 5,
     "pedidoMinimoEntrega": 0,
     "tempoEstimado": "40-60 min",
-    "enderecoRetirada": "Diamantino Mauricio, 13 - Bairro Granvile",
+    "enderecoRetirada": "Rua Seis de Janeiro, 806 - Em frente ao Pé na Areia",
     "horario": {
       "abre": "18:00",
       "fecha": "23:30",
@@ -28,11 +28,6 @@ window.MENU_DATA = {
     }
   },
   "categorias": [
-    {
-      "id": "lancamentos",
-      "nome": "Lançamentos",
-      "icone": "🆕"
-    },
     {
       "id": "combos",
       "nome": "Combos",
@@ -47,6 +42,21 @@ window.MENU_DATA = {
       "id": "especiais",
       "nome": "Especiais Brutu's",
       "icone": "🔥"
+    },
+    {
+      "id": "frango",
+      "nome": "Lanches de Frango",
+      "icone": "🐔"
+    },
+    {
+      "id": "costela",
+      "nome": "Lanches de Costela",
+      "icone": "🥩"
+    },
+    {
+      "id": "vegetarianos",
+      "nome": "Vegetarianos",
+      "icone": "🌿"
     },
     {
       "id": "porcoes",
@@ -124,7 +134,7 @@ window.MENU_DATA = {
   "produtos": [
     {
       "id": "l001",
-      "categoria": "lancamentos",
+      "categoria": "combos",
       "nome": "Banheira de Cheddar Brutu's",
       "descricao": "Pão macio, hambúrguer, fatia de cheddar, bacon e molho da casa, tudo mergulhado em uma banheira de cheddar.",
       "foto": "img/produtos/banheira-cheddar-brutus.jpg",
@@ -147,7 +157,7 @@ window.MENU_DATA = {
       ],
       "escolhaUnicaTitulo": "Escolha o acompanhamento (grátis, um ou outro)",
       "destaque": true,
-      "lancamento": true
+      "lancamento": false
     },
     {
       "id": "c001",
@@ -907,8 +917,8 @@ window.MENU_DATA = {
     {
       "id": "b015",
       "categoria": "bebidas",
-      "nome": "Suco de Morango da Fruta 300ml",
-      "descricao": "Suco natural de morango, feito com frutas selecionadas, sem conservantes e sem corantes. 300ml.",
+      "nome": "Suco Natural 300ml",
+      "descricao": "Consulte o sabor disponível. 300ml.",
       "foto": "img/produtos/suco-morango.jpg",
       "preco": 5,
       "ingredientes": [],
@@ -918,8 +928,8 @@ window.MENU_DATA = {
     {
       "id": "b016",
       "categoria": "bebidas",
-      "nome": "Suco de Morango da Fruta 500ml",
-      "descricao": "Suco natural de morango, feito com frutas selecionadas, sem conservantes e sem corantes. 500ml.",
+      "nome": "Suco Natural 500ml",
+      "descricao": "Consulte o sabor disponível. 500ml.",
       "foto": "img/produtos/suco-morango.jpg",
       "preco": 8,
       "ingredientes": [],
@@ -1031,8 +1041,156 @@ window.MENU_DATA = {
       "qtdLanches": 2
     },
     {
+      "id": "c008",
+      "categoria": "combos",
+      "nome": "Combo Individual X Brutus Clássico",
+      "descricao": "1 X Brutus Clássico, batata frita 200g e 1 refrigerante 200ml ou suco 450ml.",
+      "foto": "img/produtos/brutus-classico.jpg",
+      "preco": 37.99,
+      "ingredientes": [
+        "1x X Brutus Clássico",
+        "1x Batata frita 200g",
+        "1x Refrigerante 200ml ou Suco 450ml"
+      ],
+      "adicionais": [
+        "acomp-guarana",
+        "acomp-suco",
+        "add-bacon",
+        "add-cheddar",
+        "add-ovo"
+      ],
+      "escolhaUnicaIds": [
+        "acomp-guarana",
+        "acomp-suco"
+      ],
+      "escolhaUnicaTitulo": "Escolha a bebida do combo",
+      "destaque": true,
+      "lancamento": false
+    },
+    {
+      "id": "c009",
+      "categoria": "combos",
+      "nome": "Combo Duplo X Brutus Clássico",
+      "descricao": "2 X Brutus Clássicos, batata frita 200g e 1 refrigerante 1L.",
+      "foto": "img/produtos/combo-esquadrao.jpg",
+      "preco": 69.99,
+      "ingredientes": [
+        "2x X Brutus Clássico",
+        "1x Batata frita 200g",
+        "1x Refrigerante 1L"
+      ],
+      "adicionais": [
+        "add-bacon",
+        "add-cheddar",
+        "add-ovo",
+        "add-hamburguer-extra"
+      ],
+      "destaque": true,
+      "lancamento": false,
+      "qtdLanches": 2
+    },
+    {
+      "id": "c010",
+      "categoria": "combos",
+      "nome": "Combo Família X Brutus Clássico",
+      "descricao": "3 X Brutus Clássicos, batata frita 400g e 1 refrigerante 2L.",
+      "foto": "img/produtos/combo-familia-brutus.jpg",
+      "preco": 99.99,
+      "ingredientes": [
+        "3x X Brutus Clássico",
+        "1x Batata frita 400g",
+        "1x Refrigerante 2L"
+      ],
+      "adicionais": [
+        "add-bacon",
+        "add-cheddar",
+        "add-ovo",
+        "add-hamburguer-extra"
+      ],
+      "destaque": true,
+      "lancamento": false,
+      "qtdLanches": 3
+    },
+    {
+      "id": "f001",
+      "categoria": "frango",
+      "nome": "X Frango Brutu's Tudo",
+      "descricao": "Pão, frango, salsicha, bacon, ovo, presunto, muçarela, catupiry, cheddar, alface, tomate, batata palha e molho da casa. Acompanha Coca-Cola 600ml.",
+      "foto": "img/produtos/xtudo-brutus.jpg",
+      "preco": 42.9,
+      "ingredientes": [
+        "Pão",
+        "Frango",
+        "Salsicha",
+        "Bacon",
+        "Ovo",
+        "Presunto",
+        "Muçarela",
+        "Catupiry",
+        "Cheddar",
+        "Alface",
+        "Tomate",
+        "Batata palha",
+        "Molho da casa",
+        "Coca-Cola 600ml"
+      ],
+      "adicionais": [
+        "add-bacon",
+        "add-cheddar",
+        "add-ovo"
+      ],
+      "destaque": true,
+      "lancamento": false
+    },
+    {
+      "id": "f002",
+      "categoria": "frango",
+      "nome": "X Frango Bacon e Cheddar",
+      "descricao": "Pão, frango, bacon e cheddar. Acompanha Coca-Cola 600ml.",
+      "foto": "img/produtos/brutus-classico.jpg",
+      "preco": 37.9,
+      "ingredientes": [
+        "Pão",
+        "Frango",
+        "Bacon",
+        "Cheddar",
+        "Coca-Cola 600ml"
+      ],
+      "adicionais": [
+        "add-bacon",
+        "add-cheddar",
+        "add-ovo"
+      ],
+      "destaque": false,
+      "lancamento": false
+    },
+    {
+      "id": "f003",
+      "categoria": "frango",
+      "nome": "X Frango Catupiry, Bacon e Salada",
+      "descricao": "Pão, frango, catupiry, bacon, alface e tomate. Acompanha Coca-Cola lata 350ml.",
+      "foto": "img/produtos/croc-catupiry-brutus.jpg",
+      "preco": 37.9,
+      "ingredientes": [
+        "Pão",
+        "Frango",
+        "Catupiry",
+        "Bacon",
+        "Alface",
+        "Tomate",
+        "Coca-Cola lata 350ml"
+      ],
+      "adicionais": [
+        "add-bacon",
+        "add-cheddar",
+        "add-ovo"
+      ],
+      "destaque": false,
+      "lancamento": false
+    },
+    {
       "id": "l002",
-      "categoria": "lancamentos",
+      "categoria": "vegetarianos",
       "nome": "Croc Catupiry Brutu's",
       "descricao": "Pão, catupiry empanado, 2 fatias de cheddar, tomate, rúcula e molho da casa.",
       "foto": "img/produtos/croc-catupiry-brutus.jpg",
@@ -1052,11 +1210,11 @@ window.MENU_DATA = {
         "add-cebola-caramelizada"
       ],
       "destaque": true,
-      "lancamento": true
+      "lancamento": false
     },
     {
       "id": "l003",
-      "categoria": "lancamentos",
+      "categoria": "hamburgueres-gourmet",
       "nome": "Brutus Prime",
       "descricao": "Pão, hambúrguer, muçarela, catupiry, cebola caramelizada, tomate e rúcula.",
       "foto": "https://placehold.co/600x450/241c17/ffb703?text=Brutus+Prime",
@@ -1076,11 +1234,11 @@ window.MENU_DATA = {
         "add-ovo"
       ],
       "destaque": true,
-      "lancamento": true
+      "lancamento": false
     },
     {
       "id": "l004",
-      "categoria": "lancamentos",
+      "categoria": "costela",
       "nome": "Costela Brutos",
       "descricao": "Pão, hambúrguer, costela desfiada, muçarela, catupiry, alface, tomate e molho da casa.",
       "foto": "img/produtos/costela-brutos.jpg",
@@ -1103,11 +1261,11 @@ window.MENU_DATA = {
         "add-hamburguer-extra"
       ],
       "destaque": true,
-      "lancamento": true
+      "lancamento": false
     },
     {
       "id": "l005",
-      "categoria": "lancamentos",
+      "categoria": "vegetarianos",
       "nome": "Brutu's Veggie",
       "descricao": "Pão macio, 2 catupirys empanados, muçarela e cheddar, cebola roxa, rúcula, tomate e molho da casa.",
       "foto": "img/produtos/brutus-veggie.jpg",
@@ -1127,11 +1285,11 @@ window.MENU_DATA = {
         "add-cebola-caramelizada"
       ],
       "destaque": true,
-      "lancamento": true
+      "lancamento": false
     },
     {
       "id": "l006",
-      "categoria": "lancamentos",
+      "categoria": "costela",
       "nome": "King Costela Brutus",
       "descricao": "Pão selado na manteiga, hambúrguer blend 180g, costela desfiada, bacon, cebola caramelizada, fatia de cheddar, anel de cebola, catupiry e molho da casa.",
       "foto": "img/produtos/king-costela-brutus.jpg",
@@ -1155,7 +1313,7 @@ window.MENU_DATA = {
         "add-hamburguer-extra"
       ],
       "destaque": true,
-      "lancamento": true
+      "lancamento": false
     }
   ],
   "taxasEntrega": [

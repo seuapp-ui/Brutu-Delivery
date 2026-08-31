@@ -15,6 +15,10 @@ test("estrutura mínima do cardápio é válida", () => {
   assert.ok(menu.produtos.length > 0);
 });
 
+test("endereço de retirada está atualizado", () => {
+  assert.equal(menu.restaurante.enderecoRetirada, "Rua Seis de Janeiro, 806 - Em frente ao Pé na Areia");
+});
+
 test("IDs de categorias e produtos não se repetem", () => {
   const validar = (lista) => assert.equal(new Set(lista.map((x) => x.id)).size, lista.length);
   validar(menu.categorias);
@@ -45,7 +49,27 @@ test("BRUTU'S PICKLES está correto", () => {
   assert.ok(produto.ingredientes.includes("Picles crocantes"));
 });
 
+test("combos X Brutus Clássico possuem composição e preços corretos", () => {
+  const individual = menu.produtos.find((p) => p.id === "c008");
+  const duplo = menu.produtos.find((p) => p.id === "c009");
+  const familia = menu.produtos.find((p) => p.id === "c010");
+  assert.equal(individual.preco, 37.99);
+  assert.equal(duplo.preco, 69.99);
+  assert.equal(duplo.qtdLanches, 2);
+  assert.equal(familia.preco, 99.99);
+  assert.equal(familia.qtdLanches, 3);
+  assert.ok(familia.ingredientes.includes("3x X Brutus Clássico"));
+});
+
 test("espelhos JSON do cardápio permanecem iguais", () => {
   const espelho = JSON.parse(fs.readFileSync(path.join(raiz, "menu.json"), "utf8"));
   assert.deepEqual(espelho, menu);
+});
+
+test("fallback de dois cliques permanece igual ao cardápio oficial", () => {
+  const arquivo = fs.readFileSync(path.join(raiz, "data", "menu-data.js"), "utf8");
+  const prefixo = "// Gerado automaticamente a partir de data/menu.json\nwindow.MENU_DATA = ";
+  assert.ok(arquivo.startsWith(prefixo));
+  const embutido = JSON.parse(arquivo.slice(prefixo.length).replace(/;\s*$/, ""));
+  assert.deepEqual(embutido, menu);
 });
