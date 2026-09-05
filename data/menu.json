@@ -1342,51 +1342,231 @@
     }
   ],
   "taxasEntrega": [
-    { "id": "alto-da-boa-vista", "nome": "Alto da Boa Vista", "valor": 5 },
-    { "id": "area-rural-de-morro-agudo", "nome": "Área Rural de Morro Agudo", "valor": 5 },
-    { "id": "centro", "nome": "Centro", "valor": 5 },
-    { "id": "chacaras-coqueiros", "nome": "Chácaras Coqueiros", "valor": 5 },
-    { "id": "condominio-lago-azul", "nome": "Condomínio Lago Azul", "valor": 10 },
-    { "id": "conjunto-habitacional-antonio-jose-abrahao", "nome": "Conjunto Habitacional Antônio José Abrahão", "valor": 5 },
-    { "id": "conjunto-habitacional-humberto-theodoro-de-castro", "nome": "Conjunto Habitacional Humberto Theodoro de Castro", "valor": 5 },
-    { "id": "conjunto-habitacional-miguel-fiatikoski", "nome": "Conjunto Habitacional Miguel Fiatikoski", "valor": 5 },
-    { "id": "desmembramento-vista-alegre", "nome": "Desmembramento Vista Alegre", "valor": 5 },
-    { "id": "distrito-empresarial-shigeyuki-yamaguchi", "nome": "Distrito Empresarial Shigeyuki Yamaguchi (Paulo Yamaguchi)", "valor": 5 },
-    { "id": "estancia-santo-antonio", "nome": "Estância Santo Antônio", "valor": 5 },
-    { "id": "jardim-california", "nome": "Jardim Califórnia", "valor": 5 },
-    { "id": "jardim-cambui", "nome": "Jardim Cambuí", "valor": 5 },
-    { "id": "jardim-canada", "nome": "Jardim Canadá", "valor": 5 },
-    { "id": "jardim-das-veredas", "nome": "Jardim das Veredas", "valor": 5 },
-    { "id": "jardim-dos-ipes", "nome": "Jardim dos Ipês", "valor": 5 },
-    { "id": "jardim-europa", "nome": "Jardim Europa", "valor": 5 },
-    { "id": "jardim-marina", "nome": "Jardim Marina", "valor": 5 },
-    { "id": "jardim-martins-lourenco", "nome": "Jardim Martins Lourenço", "valor": 5 },
-    { "id": "jardim-monte-cristo", "nome": "Jardim Monte Cristo", "valor": 5 },
-    { "id": "jardim-morada-do-lago", "nome": "Jardim Morada do Lago", "valor": 8 },
-    { "id": "jardim-morada-do-sol", "nome": "Jardim Morada do Sol", "valor": 5 },
-    { "id": "jardim-primavera", "nome": "Jardim Primavera", "valor": 5 },
-    { "id": "jardim-regina", "nome": "Jardim Regina", "valor": 5 },
-    { "id": "jardim-santa-rita", "nome": "Jardim Santa Rita", "valor": 5 },
-    { "id": "jardim-sao-jose", "nome": "Jardim São José", "valor": 5 },
-    { "id": "jardim-sao-paulo", "nome": "Jardim São Paulo", "valor": 5 },
-    { "id": "jardim-silveira", "nome": "Jardim Silveira", "valor": 5 },
-    { "id": "jardim-sul", "nome": "Jardim Sul", "valor": 5 },
-    { "id": "jose-benedeti", "nome": "José Benedeti", "valor": 6 },
-    { "id": "norberto-jose-ribeiro", "nome": "Norberto José Ribeiro", "valor": 5 },
-    { "id": "nosso-teto", "nome": "Nosso Teto", "valor": 5 },
-    { "id": "parque-7-de-setembro", "nome": "Parque 7 de Setembro", "valor": 5 },
-    { "id": "parque-dom-pedro", "nome": "Parque Dom Pedro", "valor": 5 },
-    { "id": "recreio-dos-bandeirantes", "nome": "Recreio dos Bandeirantes", "valor": 5 },
-    { "id": "residencial-alfredo-benedetti", "nome": "Residencial Alfredo Benedetti", "valor": 5 },
-    { "id": "residencial-cidade-nova", "nome": "Residencial Cidade Nova", "valor": 5 },
-    { "id": "residencial-e-comercial-portal-das-palmeiras", "nome": "Residencial e Comercial Portal das Palmeiras", "valor": 5 },
-    { "id": "residencial-e-comercial-potreiro", "nome": "Residencial e Comercial Potreiro", "valor": 5 },
-    { "id": "residencial-granville", "nome": "Residencial Granville", "valor": 5 },
-    { "id": "residencial-sebastiao-muniz", "nome": "Residencial Sebastião Muniz", "valor": 5 },
-    { "id": "santo-inacio-dos-vieiras", "nome": "Santo Inácio dos Vieiras", "valor": 5 },
-    { "id": "vila-biagio", "nome": "Vila Biagio", "valor": 5 },
-    { "id": "vila-garbim", "nome": "Vila Garbim", "valor": 5 },
-    { "id": "vila-martins", "nome": "Vila Martins", "valor": 5 }
+    {
+      "id": "alto-da-boa-vista",
+      "nome": "Alto da Boa Vista",
+      "valor": 6
+    },
+    {
+      "id": "area-rural-de-morro-agudo",
+      "nome": "Área Rural de Morro Agudo",
+      "valor": 6
+    },
+    {
+      "id": "centro",
+      "nome": "Centro",
+      "valor": 5
+    },
+    {
+      "id": "chacaras-coqueiros",
+      "nome": "Chácaras Coqueiros",
+      "valor": 6
+    },
+    {
+      "id": "condominio-lago-azul",
+      "nome": "Condomínio Lago Azul",
+      "valor": 10
+    },
+    {
+      "id": "conjunto-habitacional-antonio-jose-abrahao",
+      "nome": "Conjunto Habitacional Antônio José Abrahão",
+      "valor": 6
+    },
+    {
+      "id": "conjunto-habitacional-humberto-theodoro-de-castro",
+      "nome": "Conjunto Habitacional Humberto Theodoro de Castro",
+      "valor": 6
+    },
+    {
+      "id": "conjunto-habitacional-miguel-fiatikoski",
+      "nome": "Conjunto Habitacional Miguel Fiatikoski",
+      "valor": 6
+    },
+    {
+      "id": "desmembramento-vista-alegre",
+      "nome": "Desmembramento Vista Alegre",
+      "valor": 6
+    },
+    {
+      "id": "distrito-empresarial-shigeyuki-yamaguchi",
+      "nome": "Distrito Empresarial Shigeyuki Yamaguchi (Paulo Yamaguchi)",
+      "valor": 6
+    },
+    {
+      "id": "estancia-santo-antonio",
+      "nome": "Estância Santo Antônio",
+      "valor": 6
+    },
+    {
+      "id": "jardim-california",
+      "nome": "Jardim Califórnia",
+      "valor": 6
+    },
+    {
+      "id": "jardim-cambui",
+      "nome": "Jardim Cambuí",
+      "valor": 6
+    },
+    {
+      "id": "jardim-canada",
+      "nome": "Jardim Canadá",
+      "valor": 6
+    },
+    {
+      "id": "jardim-das-veredas",
+      "nome": "Jardim das Veredas",
+      "valor": 6
+    },
+    {
+      "id": "jardim-dos-ipes",
+      "nome": "Jardim dos Ipês",
+      "valor": 5
+    },
+    {
+      "id": "jardim-europa",
+      "nome": "Jardim Europa",
+      "valor": 6
+    },
+    {
+      "id": "jardim-marina",
+      "nome": "Jardim Marina",
+      "valor": 6
+    },
+    {
+      "id": "jardim-martins-lourenco",
+      "nome": "Jardim Martins Lourenço",
+      "valor": 6
+    },
+    {
+      "id": "jardim-monte-cristo",
+      "nome": "Jardim Monte Cristo",
+      "valor": 6
+    },
+    {
+      "id": "jardim-morada-do-lago",
+      "nome": "Jardim Morada do Lago",
+      "valor": 8
+    },
+    {
+      "id": "jardim-morada-do-sol",
+      "nome": "Jardim Morada do Sol",
+      "valor": 6
+    },
+    {
+      "id": "jardim-primavera",
+      "nome": "Jardim Primavera",
+      "valor": 6
+    },
+    {
+      "id": "jardim-regina",
+      "nome": "Jardim Regina",
+      "valor": 6
+    },
+    {
+      "id": "jardim-santa-rita",
+      "nome": "Jardim Santa Rita",
+      "valor": 6
+    },
+    {
+      "id": "jardim-sao-jose",
+      "nome": "Jardim São José",
+      "valor": 6
+    },
+    {
+      "id": "jardim-sao-paulo",
+      "nome": "Jardim São Paulo",
+      "valor": 6
+    },
+    {
+      "id": "jardim-silveira",
+      "nome": "Jardim Silveira",
+      "valor": 6
+    },
+    {
+      "id": "jardim-sul",
+      "nome": "Jardim Sul",
+      "valor": 6
+    },
+    {
+      "id": "jose-benedeti",
+      "nome": "José Benedeti",
+      "valor": 6
+    },
+    {
+      "id": "norberto-jose-ribeiro",
+      "nome": "Norberto José Ribeiro",
+      "valor": 6
+    },
+    {
+      "id": "nosso-teto",
+      "nome": "Nosso Teto",
+      "valor": 6
+    },
+    {
+      "id": "parque-7-de-setembro",
+      "nome": "Parque 7 de Setembro",
+      "valor": 5
+    },
+    {
+      "id": "parque-dom-pedro",
+      "nome": "Parque Dom Pedro",
+      "valor": 6
+    },
+    {
+      "id": "recreio-dos-bandeirantes",
+      "nome": "Recreio dos Bandeirantes",
+      "valor": 6
+    },
+    {
+      "id": "residencial-alfredo-benedetti",
+      "nome": "Residencial Alfredo Benedetti",
+      "valor": 6
+    },
+    {
+      "id": "residencial-cidade-nova",
+      "nome": "Residencial Cidade Nova",
+      "valor": 6
+    },
+    {
+      "id": "residencial-e-comercial-portal-das-palmeiras",
+      "nome": "Residencial e Comercial Portal das Palmeiras",
+      "valor": 6
+    },
+    {
+      "id": "residencial-e-comercial-potreiro",
+      "nome": "Residencial e Comercial Potreiro",
+      "valor": 6
+    },
+    {
+      "id": "residencial-granville",
+      "nome": "Residencial Granville",
+      "valor": 6
+    },
+    {
+      "id": "residencial-sebastiao-muniz",
+      "nome": "Residencial Sebastião Muniz",
+      "valor": 6
+    },
+    {
+      "id": "santo-inacio-dos-vieiras",
+      "nome": "Santo Inácio dos Vieiras",
+      "valor": 6
+    },
+    {
+      "id": "vila-biagio",
+      "nome": "Vila Biagio",
+      "valor": 6
+    },
+    {
+      "id": "vila-garbim",
+      "nome": "Vila Garbim",
+      "valor": 6
+    },
+    {
+      "id": "vila-martins",
+      "nome": "Vila Martins",
+      "valor": 6
+    }
   ],
   "cupons": [
     {

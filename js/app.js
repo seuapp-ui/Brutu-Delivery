@@ -964,9 +964,9 @@
   const ZONAS_ENTREGA_FALLBACK = [
     { nome: "Centro", taxa: 5.0 },
     { nome: "Ipê", taxa: 5.0 },
-    { nome: "Monte Cristo", taxa: 5.0 },
-    { nome: "Jardim da Silveira", taxa: 5.0 },
-    { nome: "Sem Terra", taxa: 5.0 },
+    { nome: "Monte Cristo", taxa: 6.0 },
+    { nome: "Jardim da Silveira", taxa: 6.0 },
+    { nome: "Sem Terra", taxa: 6.0 },
     { nome: "Benedetti", taxa: 6.0 },
     { nome: "Morada do Lago", taxa: 8.0 },
     { nome: "Lago Azul", taxa: 10.0 },
