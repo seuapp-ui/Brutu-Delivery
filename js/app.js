@@ -64,6 +64,8 @@
     produtoEmEdicao: null,    // produto aberto no modal
     adicionaisSelecionados: [],   // array de Set — um Set por lanche (combos com vários lanches têm 1 Set por lanche)
     quantidadeModal: 1,
+    itemUidEmEdicao: null,    // item da sacola aberto para editar
+    checkoutEtapa: 1,         // 1 sacola, 2 dados, 3 revisão
     _statusInterval: null,     // setInterval do relógio "Aberto/Fechado" (já existia)
     _menuPollInterval: null,   // setInterval da verificação automática do cardápio
     _menuPollEmAndamento: false, // evita duas verificações simultâneas
@@ -417,6 +419,18 @@
     $("#restaurante-tempo").textContent = r.tempoEstimado || "";
     document.title = `${r.nome} — Cardápio`;
 
+    const telefoneDigitos = String(r.whatsapp || "").replace(/\D/g, "");
+    const telefoneFormatado = telefoneDigitos.length === 13
+      ? `(${telefoneDigitos.slice(2, 4)}) ${telefoneDigitos.slice(4, 9)}-${telefoneDigitos.slice(9)}`
+      : (r.whatsapp || "");
+    const enderecoRetirada = r.enderecoRetirada || "Consulte o endereço de retirada";
+    $("#footer-endereco").textContent = enderecoRetirada;
+    $("#footer-mapa").href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(enderecoRetirada)}`;
+    $("#footer-telefone").textContent = telefoneFormatado;
+    $("#footer-whatsapp").href = telefoneDigitos ? `https://wa.me/${telefoneDigitos}` : "#";
+    $("#footer-horario").textContent = r.horario?.abre && r.horario?.fecha
+      ? `${r.horario.abre} às ${r.horario.fecha}` : "Consulte o horário";
+
     $("#hero-title").textContent = r.nome;
     $("#hero-slogan").textContent = r.slogan || "";
     $("#hero-slogan").classList.toggle("hidden", !r.slogan);
@@ -506,6 +520,12 @@
     return true;
   }
 
+  function adicionalDisponivel(adicional) {
+    if (!adicional || adicional.disponivel === false) return false;
+    if (adicional.estoque !== undefined && adicional.estoque !== null && adicional.estoque !== "" && Number(adicional.estoque) <= 0) return false;
+    return true;
+  }
+
   function produtosFiltrados() {
     const termo = state.termoBusca.trim().toLowerCase();
     const base = (state.menu.produtos || []).filter(produtoVisivelNoCardapio);
@@ -556,6 +576,9 @@
     // Tocar no resto do card continua abrindo o modal completo (útil se o
     // cliente quiser deixar uma observação, mesmo sem adicionais).
     const semAdicionais = !(produto.adicionais && produto.adicionais.length);
+    const informacaoCombo = produto.qtdLanches > 1
+      ? `Serve ${produto.qtdLanches} pessoas`
+      : (produto.categoria === "combos" ? "Combo individual" : "");
 
     // Usamos <div role="button"> em vez de <button> porque o botão de
     // adição rápida também precisa ser um <button> — e a especificação de
@@ -567,13 +590,14 @@
     card.setAttribute("aria-label", `${produto.nome}, ${formatarPreco(produto.preco)}`);
     card.innerHTML = `
       <div class="product-photo">
-        ${produto.destaque ? `<span class="badge-destaque selo">TOP</span>` : ""}
+        ${produto.destaque ? `<span class="badge-destaque">Mais pedido</span>` : ""}
         ${produto.lancamento ? `<span class="badge-lancamento">🆕 Novo</span>` : ""}
         <img src="${escaparHtml(produto.foto)}" alt="${escaparHtml(produto.nome)}" loading="lazy">
       </div>
       <div class="product-info">
         <div class="product-name">${escaparHtml(produto.nome)}</div>
         <div class="product-desc">${escaparHtml(produto.descricao)}</div>
+        ${informacaoCombo ? `<div class="product-serving">🍔 ${escaparHtml(informacaoCombo)}</div>` : ""}
         <div class="product-bottom">
           <span class="product-price">${formatarPreco(produto.preco)}</span>
           ${semAdicionais
@@ -651,17 +675,31 @@
   /* =====================================================================
      6. MODAL DE PRODUTO
      ===================================================================== */
-  function abrirModalProduto(produto) {
+  function abrirModalProduto(produto, itemEdicao = null) {
     state.produtoEmEdicao = produto;
+    state.itemUidEmEdicao = itemEdicao ? itemEdicao.uid : null;
+    if (itemEdicao) $("#cart-overlay")?.classList.add("hidden");
     const qtdLanches = produto.qtdLanches && produto.qtdLanches > 1 ? produto.qtdLanches : 1;
-    state.adicionaisSelecionados = Array.from({ length: qtdLanches }, () => new Set());
-    state.quantidadeModal = 1;
+    state.adicionaisSelecionados = Array.from({ length: qtdLanches }, (_, indice) => {
+      if (!itemEdicao) return new Set();
+      const grupo = itemEdicao.adicionaisPorLanche
+        ? (itemEdicao.adicionaisPorLanche[indice] || [])
+        : (indice === 0 ? (itemEdicao.adicionais || []) : []);
+      return new Set(grupo.filter(adicionalDisponivel).map((adicional) => adicional.id));
+    });
+    state.quantidadeModal = itemEdicao ? itemEdicao.quantidade : 1;
 
     $("#product-modal-photo").src = produto.foto;
     $("#product-modal-photo").alt = produto.nome;
     $("#product-modal-title").textContent = produto.nome;
     $("#product-modal-desc").textContent = produto.descricao;
-    $("#product-obs").value = "";
+    const metadados = [];
+    if (produto.destaque) metadados.push("🔥 Mais pedido");
+    if (produto.qtdLanches > 1) metadados.push(`🍔 Serve ${produto.qtdLanches} pessoas`);
+    else if (produto.categoria === "combos") metadados.push("🍔 Combo individual");
+    if (produto.lancamento) metadados.push("✨ Novidade");
+    $("#product-modal-meta").innerHTML = metadados.map((item) => `<span>${escaparHtml(item)}</span>`).join("");
+    $("#product-obs").value = itemEdicao ? (itemEdicao.observacao || "") : "";
 
     // Ingredientes (somente informativo)
     const ingredientesWrap = $("#product-ingredientes");
@@ -679,7 +717,10 @@
     // renderizado como radio em vez de checkbox. Combos com mais de um
     // lanche (produto.qtdLanches > 1) repetem o bloco de adicionais uma vez
     // por lanche, cada um com sua própria seleção independente.
-    const adicionaisIds = produto.adicionais || [];
+    const adicionaisIds = (produto.adicionais || []).filter((id) => {
+      const adicional = state.menu.adicionaisDisponiveis.find((item) => item.id === id);
+      return adicionalDisponivel(adicional);
+    });
     const escolhaUnicaIds = (produto.escolhaUnicaIds || []).filter((id) => adicionaisIds.includes(id));
     const normalIds = adicionaisIds.filter((id) => !escolhaUnicaIds.includes(id));
     const adicionaisBlock = $("#product-adicionais-block");
@@ -697,10 +738,7 @@
         wrap.appendChild(tituloLanche);
       }
 
-      if (escolhaUnicaIds.length) {
-        const jaSelecionado = escolhaUnicaIds.some((id) => setSelecionados.has(id));
-        if (!jaSelecionado) setSelecionados.add(escolhaUnicaIds[0]);
-
+      if (escolhaUnicaIds.length && (!produto.escolhaUnicaGlobal || lancheIndex === 0)) {
         if (produto.escolhaUnicaTitulo) {
           const tituloEl = document.createElement("div");
           tituloEl.className = "addon-group-title";
@@ -736,9 +774,26 @@
         });
       }
 
+      const gruposAdicionais = new Map();
       normalIds.forEach((id) => {
         const def = state.menu.adicionaisDisponiveis.find((a) => a.id === id);
         if (!def) return;
+        const nome = String(def.nome || "").toLowerCase();
+        const grupo = /hambúrguer|carne|bacon|calabresa|ovo/.test(nome)
+          ? "Carnes e complementos"
+          : /cheddar|catupiry|queijo|muçarela/.test(nome)
+            ? "Queijos e cremes"
+            : /molho|cebola/.test(nome) ? "Molhos e sabores" : "Acompanhamentos";
+        if (!gruposAdicionais.has(grupo)) gruposAdicionais.set(grupo, []);
+        gruposAdicionais.get(grupo).push(def);
+      });
+
+      gruposAdicionais.forEach((defs, nomeGrupo) => {
+        const tituloCategoria = document.createElement("div");
+        tituloCategoria.className = "addon-category-title";
+        tituloCategoria.textContent = nomeGrupo;
+        wrap.appendChild(tituloCategoria);
+        defs.forEach((def) => {
         const marcado = setSelecionados.has(def.id);
         const row = document.createElement("div");
         row.className = "addon-row";
@@ -764,6 +819,7 @@
           if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); }
         });
         wrap.appendChild(row);
+        });
       });
 
       return wrap;
@@ -783,7 +839,8 @@
       adicionaisBlock.classList.add("hidden");
     }
 
-    $("#qty-value").textContent = "1";
+    $("#qty-value").textContent = String(state.quantidadeModal);
+    $("#add-to-cart-btn").querySelector("span:first-child").textContent = itemEdicao ? "Salvar alterações" : "Adicionar";
     atualizarPrecoModal();
 
     $("#product-overlay").classList.remove("hidden");
@@ -791,8 +848,15 @@
   }
 
   function fecharModalProduto() {
+    const voltarParaSacola = Boolean(state.itemUidEmEdicao);
+    state.itemUidEmEdicao = null;
     $("#product-overlay").classList.add("hidden");
-    travarScroll(false);
+    if (voltarParaSacola) {
+      $("#cart-overlay").classList.remove("hidden");
+      travarScroll(true);
+    } else {
+      travarScroll(false);
+    }
   }
 
   function precoUnitarioModal() {
@@ -827,15 +891,26 @@
 
   function adicionarAoCarrinhoDoModal() {
     const produto = state.produtoEmEdicao;
+    if (produto.escolhaObrigatoria) {
+      const idsObrigatorios = new Set(produto.escolhaUnicaIds || []);
+      const quantidadeEscolhida = state.adicionaisSelecionados.reduce(
+        (total, grupo) => total + Array.from(grupo).filter((id) => idsObrigatorios.has(id)).length, 0
+      );
+      if (quantidadeEscolhida !== 1) {
+        mostrarToast(produto.escolhaUnicaTitulo || "Escolha uma opção obrigatória para continuar.", 3200);
+        $("#product-adicionais-block")?.scrollIntoView({ behavior: "smooth", block: "center" });
+        return;
+      }
+    }
     const adicionaisPorLanche = state.adicionaisSelecionados.map((setLanche) =>
       Array.from(setLanche).map((id) =>
         state.menu.adicionaisDisponiveis.find((a) => a.id === id)
-      ).filter(Boolean)
+      ).filter(adicionalDisponivel)
     );
     const adicionaisEscolhidos = adicionaisPorLanche.flat(); // [{id, nome, preco}] — soma de todos os lanches
 
     const item = {
-      uid: gerarUidItem(produto.id),
+      uid: state.itemUidEmEdicao || gerarUidItem(produto.id),
       produtoId: produto.id,
       nome: produto.nome,
       precoBase: produto.preco,
@@ -846,11 +921,23 @@
       observacao: $("#product-obs").value.trim(),
       quantidade: state.quantidadeModal,
     };
-    state.cart.push(item);
+    const indiceEdicao = state.itemUidEmEdicao
+      ? state.cart.findIndex((atual) => atual.uid === state.itemUidEmEdicao)
+      : -1;
+    if (indiceEdicao >= 0) state.cart.splice(indiceEdicao, 1, item);
+    else state.cart.push(item);
+    const foiEdicao = indiceEdicao >= 0;
+    state.itemUidEmEdicao = null;
     salvarCart();
     renderCartBar();
     fecharModalProduto();
-    mostrarToast(`${produto.nome} adicionado à sacola ✅`);
+    if (foiEdicao) {
+      renderCarrinho();
+      mostrarEtapaCheckout(1, false);
+      $("#cart-overlay").classList.remove("hidden");
+      travarScroll(true);
+    }
+    mostrarToast(foiEdicao ? `${produto.nome} atualizado ✅` : `${produto.nome} adicionado à sacola ✅`);
   }
 
   /* =====================================================================
@@ -863,6 +950,13 @@
   function subtotalCarrinho() {
     const bruto = state.cart.reduce((acc, item) => acc + precoUnitarioItem(item) * item.quantidade, 0);
     return arredondarMoeda(bruto);
+  }
+
+  function carrinhoEstaDisponivel() {
+    return state.cart.every((item) => {
+      const produto = (state.menu.produtos || []).find((p) => p.id === item.produtoId);
+      return Boolean(produto) && produtoVisivelNoCardapio(produto) && (item.adicionais || []).every(adicionalDisponivel);
+    });
   }
 
   // Bairros/regiões: preferência para menu.taxasEntrega (editável no painel).
@@ -941,6 +1035,61 @@
     return arredondarMoeda(Math.max(0,
       subtotalCarrinho() + taxaEntregaAtual() - calcularDescontoCupom() - calcularDescontoRoleta()
     ));
+  }
+
+  function valorPedidoMinimo() {
+    return Math.max(0, Number(state.menu?.restaurante?.pedidoMinimoEntrega) || 0);
+  }
+
+  function pedidoMinimoAtendido() {
+    return state.tipoEntrega === "retirada" || subtotalCarrinho() >= valorPedidoMinimo();
+  }
+
+  function renderPedidoMinimo() {
+    const aviso = $("#minimum-order");
+    if (!aviso) return;
+    const minimo = valorPedidoMinimo();
+    const falta = arredondarMoeda(Math.max(0, minimo - subtotalCarrinho()));
+    const mostrar = state.tipoEntrega === "entrega" && minimo > 0;
+    aviso.classList.toggle("hidden", !mostrar);
+    if (!mostrar) return;
+    const percentual = Math.min(100, Math.round((subtotalCarrinho() / minimo) * 100));
+    aviso.classList.toggle("complete", falta <= 0);
+    aviso.innerHTML = falta > 0
+      ? `<div><strong>Pedido mínimo para entrega: ${formatarPreco(minimo)}</strong><span>Faltam ${formatarPreco(falta)}</span></div><i><b style="width:${percentual}%"></b></i>`
+      : `<div><strong>✓ Pedido mínimo alcançado</strong><span>Entrega liberada</span></div><i><b style="width:100%"></b></i>`;
+  }
+
+  function renderSugestoesInteligentes() {
+    const secao = $("#smart-suggestions");
+    const lista = $("#smart-suggestions-list");
+    if (!secao || !lista) return;
+    const categoriasNaSacola = new Set(state.cart.map((item) =>
+      (state.menu.produtos || []).find((produto) => produto.id === item.produtoId)?.categoria
+    ));
+    const idsNaSacola = new Set(state.cart.map((item) => item.produtoId));
+    const candidatos = [];
+    if (!categoriasNaSacola.has("bebidas")) {
+      candidatos.push(...state.menu.produtos.filter((p) => p.categoria === "bebidas" && produtoVisivelNoCardapio(p)).slice(0, 2));
+    }
+    if (!categoriasNaSacola.has("porcoes")) {
+      candidatos.push(...state.menu.produtos.filter((p) => p.categoria === "porcoes" && produtoVisivelNoCardapio(p)).slice(0, 2));
+    }
+    const unicos = candidatos.filter((produto, indice, todos) =>
+      !idsNaSacola.has(produto.id) && todos.findIndex((p) => p.id === produto.id) === indice
+    ).slice(0, 4);
+    secao.classList.toggle("hidden", !unicos.length);
+    lista.innerHTML = "";
+    unicos.forEach((produto) => {
+      const card = document.createElement("article");
+      card.className = "smart-suggestion-card";
+      card.innerHTML = `<img src="${escaparHtml(produto.foto)}" alt=""><div><strong>${escaparHtml(produto.nome)}</strong><span>${formatarPreco(produto.preco)}</span></div><button type="button" aria-label="Adicionar ${escaparHtml(produto.nome)}">+</button>`;
+      $("button", card).addEventListener("click", () => {
+        adicionarRapido(produto);
+        renderCarrinho();
+      });
+      lista.appendChild(card);
+    });
   }
 
   function atualizarSecaoPremiosCheckout() {
@@ -1110,7 +1259,10 @@
     $("#cart-empty-view").classList.toggle("hidden", !vazio);
     $("#cart-filled-view").classList.toggle("hidden", vazio);
 
-    if (vazio) renderSugestaoUltimoPedido();
+    if (vazio) {
+      renderSugestaoUltimoPedido();
+      mostrarEtapaCheckout(1, false);
+    }
 
     const infoHorario = obterInfoHorario(state.menu.restaurante.horario);
     $("#cart-loja-fechada-aviso").classList.toggle("hidden", infoHorario.aberto);
@@ -1128,6 +1280,10 @@
     state.cart.forEach((item) => {
       const el = document.createElement("div");
       el.className = "cart-item";
+      const produtoMenu = (state.menu.produtos || []).find((produto) => produto.id === item.produtoId);
+      const fotoItem = produtoMenu?.foto || "icons/icon-192.png";
+      const itemDisponivel = Boolean(produtoMenu) && produtoVisivelNoCardapio(produtoMenu) && (item.adicionais || []).every(adicionalDisponivel);
+      el.classList.toggle("cart-item-unavailable", !itemDisponivel);
       const adicionaisTxt = item.adicionaisPorLanche
         ? item.adicionaisPorLanche
             .map((grupo, i) => (grupo.length ? `Lanche ${i + 1}: ${grupo.map((a) => escaparHtml(a.nome)).join(", ")}` : null))
@@ -1135,11 +1291,13 @@
             .join("<br>")
         : item.adicionais.map((a) => `+ ${escaparHtml(a.nome)}`).join("<br>");
       el.innerHTML = `
-        <span class="cart-item-qty">${item.quantidade}x</span>
+        <img class="cart-item-photo" src="${escaparHtml(fotoItem)}" alt="" loading="lazy">
         <div class="cart-item-info">
           <div class="cart-item-name">${escaparHtml(item.nome)}</div>
+          ${!itemDisponivel ? `<div class="cart-item-warning">Indisponível no momento — remova para continuar</div>` : ""}
           ${adicionaisTxt ? `<div class="cart-item-addons">${adicionaisTxt}</div>` : ""}
           ${item.observacao ? `<div class="cart-item-obs">Obs: ${escaparHtml(item.observacao)}</div>` : ""}
+          ${produtoMenu ? `<button class="cart-item-edit" type="button">✏️ Editar</button>` : ""}
         </div>
         <div class="cart-item-side">
           <span class="cart-item-price">${formatarPreco(precoUnitarioItem(item) * item.quantidade)}</span>
@@ -1148,10 +1306,11 @@
             <span class="mini-qty-value">${item.quantidade}</span>
             <button class="mini-qty-btn" type="button" data-action="mais" aria-label="Aumentar quantidade de ${escaparHtml(item.nome)}">+</button>
           </div>
-          <button class="cart-item-remove" data-uid="${escaparHtml(item.uid)}" type="button">remover</button>
+          <button class="cart-item-remove" data-uid="${escaparHtml(item.uid)}" type="button">Excluir</button>
         </div>
       `;
       $(".cart-item-remove", el).addEventListener("click", () => removerDoCarrinho(item.uid));
+      $(".cart-item-edit", el)?.addEventListener("click", () => abrirModalProduto(produtoMenu, item));
       $$(".mini-qty-btn", el).forEach((btn) => {
         btn.addEventListener("click", () => {
           const delta = btn.dataset.action === "mais" ? 1 : -1;
@@ -1178,6 +1337,8 @@
       }
     }
     $("#cart-total").textContent = formatarPreco(totalCarrinho());
+    renderPedidoMinimo();
+    renderSugestoesInteligentes();
     const fin = $("#finalize-total");
     if (fin) fin.textContent = formatarPreco(totalCarrinho());
     atualizarTrocoCalculado();
@@ -1205,6 +1366,81 @@
     renderCartBar();
   }
 
+  function mostrarEtapaCheckout(etapa, rolar = true) {
+    const proxima = Math.max(1, Math.min(3, Number(etapa) || 1));
+    state.checkoutEtapa = proxima;
+    $$("[data-checkout-step]").forEach((painel) => {
+      painel.classList.toggle("hidden", Number(painel.dataset.checkoutStep) !== proxima);
+    });
+    $$("[data-checkout-step-target]").forEach((botao) => {
+      const numero = Number(botao.dataset.checkoutStepTarget);
+      botao.classList.toggle("active", numero === proxima);
+      botao.classList.toggle("completed", numero < proxima);
+      botao.setAttribute("aria-current", numero === proxima ? "step" : "false");
+    });
+    if (proxima === 3) renderRevisaoPedido();
+    if (rolar) $("#cart-sheet")?.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function dadosCheckoutValidos() {
+    if (!carrinhoEstaDisponivel()) {
+      mostrarToast("Sua sacola possui item ou adicional indisponível. Remova ou edite para continuar.", 3800);
+      mostrarEtapaCheckout(1);
+      return false;
+    }
+    if (!pedidoMinimoAtendido()) {
+      mostrarToast(`O pedido mínimo para entrega é ${formatarPreco(valorPedidoMinimo())}. Você também pode escolher retirada.`, 3800);
+      return false;
+    }
+    if (!validarFormulario()) {
+      mostrarToast("Confira os campos destacados em vermelho.");
+      const primeiroInvalido = $("#checkout-form .field.invalid input, #checkout-form .field.invalid select");
+      primeiroInvalido?.focus();
+      return false;
+    }
+    const telefone = $("#input-telefone").value.replace(/\D/g, "");
+    if (telefone.length !== 10 && telefone.length !== 11) {
+      $("#input-telefone").closest(".field")?.classList.add("invalid");
+      $("#input-telefone").focus();
+      mostrarToast("Informe o WhatsApp com DDD.");
+      return false;
+    }
+    if (state.formaPagamento === "Dinheiro" && $("#input-troco").value.trim()) {
+      const valorPago = arredondarMoeda(parseValorBR($("#input-troco").value));
+      if (isNaN(valorPago) || valorPago < totalCarrinho()) {
+        $("#input-troco").closest(".field")?.classList.add("invalid");
+        $("#input-troco").focus();
+        mostrarToast("O valor para troco não pode ser menor que o total do pedido.", 3400);
+        return false;
+      }
+    }
+    return true;
+  }
+
+  function renderRevisaoPedido() {
+    const review = $("#checkout-review");
+    if (!review) return;
+    const nome = $("#input-nome").value.trim();
+    const telefone = $("#input-telefone").value.trim();
+    const destino = state.tipoEntrega === "entrega"
+      ? `${$("#input-endereco").value.trim()}, ${$("#input-numero").value.trim()} · ${$("#input-bairro").value.trim()}`
+      : (state.menu.restaurante.enderecoRetirada || "Retirada no balcão");
+    const itens = state.cart.map((item) => `
+      <div class="review-item"><span>${item.quantidade}× ${escaparHtml(item.nome)}</span><strong>${formatarPreco(precoUnitarioItem(item) * item.quantidade)}</strong></div>
+    `).join("");
+    review.innerHTML = `
+      <div class="review-card">
+        <h3>Seu pedido</h3>${itens}
+        <div class="review-total"><span>Total</span><strong>${formatarPreco(totalCarrinho())}</strong></div>
+      </div>
+      <div class="review-grid">
+        <div class="review-card"><h3>👤 Cliente</h3><strong>${escaparHtml(nome)}</strong><small>${escaparHtml(telefone)}</small></div>
+        <div class="review-card"><h3>${state.tipoEntrega === "entrega" ? "🛵 Entrega" : "🏃 Retirada"}</h3><strong>${escaparHtml(destino)}</strong>${state.tipoEntrega === "entrega" && $("#input-referencia").value.trim() ? `<small>Referência: ${escaparHtml($("#input-referencia").value.trim())}</small>` : ""}</div>
+        <div class="review-card"><h3>💳 Pagamento</h3><strong>${escaparHtml(state.formaPagamento)}</strong>${state.formaPagamento === "Dinheiro" && $("#input-troco").value.trim() ? `<small>Pagamento: ${escaparHtml($("#input-troco").value.trim())}</small>` : ""}</div>
+      </div>
+    `;
+  }
+
   function abrirCarrinho() {
     const tel = ($("#input-telefone")?.value || "").replace(/\D/g, "");
     if (tel && window.BRUTUS_ROLETA && window.BRUTUS_ROLETA.refresh) {
@@ -1215,6 +1451,7 @@
       setTimeout(() => atualizarSecaoPremiosCheckout(), 400);
     }
     renderCarrinho();
+    mostrarEtapaCheckout(1, false);
     esconderAvisoPopupBloqueado();
     $("#cart-overlay").classList.remove("hidden");
     travarScroll(true);
@@ -1739,6 +1976,15 @@
     // envio duas vezes (duas janelas/abas do WhatsApp, duas mensagens).
     if (enviandoPedido) return;
     if (state.cart.length === 0) return;
+    if (!carrinhoEstaDisponivel()) {
+      mostrarToast("Existe um item indisponível na sacola. Revise antes de enviar.");
+      mostrarEtapaCheckout(1);
+      return;
+    }
+    if (!pedidoMinimoAtendido()) {
+      mostrarToast(`O pedido mínimo para entrega é ${formatarPreco(valorPedidoMinimo())}.`);
+      return;
+    }
 
     // Defesa extra: o botão já fica desabilitado enquanto o checkbox não
     // está marcado, mas checamos de novo aqui para não depender só do
@@ -2069,6 +2315,25 @@
     });
 
     $("#finalizar-btn").addEventListener("click", finalizarPedido);
+
+    $("#checkout-ir-dados")?.addEventListener("click", () => mostrarEtapaCheckout(2));
+    $("#checkout-voltar-sacola")?.addEventListener("click", () => mostrarEtapaCheckout(1));
+    $("#checkout-ir-revisao")?.addEventListener("click", () => {
+      if (dadosCheckoutValidos()) mostrarEtapaCheckout(3);
+    });
+    $("#checkout-editar-dados")?.addEventListener("click", () => mostrarEtapaCheckout(2));
+    $$("[data-checkout-step-target]").forEach((botao) => {
+      botao.addEventListener("click", () => {
+        const destino = Number(botao.dataset.checkoutStepTarget);
+        if (destino < state.checkoutEtapa) mostrarEtapaCheckout(destino);
+        else if (destino === 2) mostrarEtapaCheckout(2);
+        else if (destino === 3 && dadosCheckoutValidos()) mostrarEtapaCheckout(3);
+      });
+    });
+    $$("#checkout-form input, #checkout-form select, #checkout-form textarea").forEach((campo) => {
+      campo.addEventListener("input", () => campo.closest(".field")?.classList.remove("invalid"));
+      campo.addEventListener("change", () => campo.closest(".field")?.classList.remove("invalid"));
+    });
 
     $("#btn-aplicar-cupom")?.addEventListener("click", aplicarCupomDoInput);
     $("#input-cupom")?.addEventListener("keydown", (e) => {

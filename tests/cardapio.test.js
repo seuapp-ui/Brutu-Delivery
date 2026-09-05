@@ -61,6 +61,29 @@ test("combos X Brutus Clássico com bacon possuem composição e preços correto
   assert.ok(individual.ingredientes.includes("1x X Brutus Clássico com bacon"));
   assert.ok(duplo.ingredientes.includes("2x X Brutus Clássico com bacon"));
   assert.ok(familia.ingredientes.includes("3x X Brutus Clássico com bacon"));
+  for (const combo of [individual, duplo, familia]) {
+    assert.equal(combo.escolhaObrigatoria, true);
+    assert.equal(combo.escolhaUnicaGlobal, true);
+    assert.ok(combo.escolhaUnicaIds.length >= 1);
+  }
+});
+
+test("pedido mínimo e bebidas obrigatórias dos combos estão configurados", () => {
+  assert.equal(menu.restaurante.pedidoMinimoEntrega, 20);
+  assert.ok(menu.adicionaisDisponiveis.some((a) => a.id === "acomp-refri-1l"));
+  assert.ok(menu.adicionaisDisponiveis.some((a) => a.id === "acomp-refri-2l"));
+});
+
+test("lista de entrega contém as 45 localidades postais verificadas de Morro Agudo", () => {
+  const nomes = menu.taxasEntrega.map((taxa) => taxa.nome);
+  assert.equal(nomes.length, 45);
+  assert.equal(new Set(nomes).size, 45);
+  assert.ok(nomes.includes("Alto da Boa Vista"));
+  assert.ok(nomes.includes("Área Rural de Morro Agudo"));
+  assert.ok(nomes.includes("Distrito Empresarial Shigeyuki Yamaguchi (Paulo Yamaguchi)"));
+  assert.ok(nomes.includes("Santo Inácio dos Vieiras"));
+  assert.ok(nomes.includes("Vila Martins"));
+  assert.ok(!nomes.includes("Sem Terra"));
 });
 
 test("espelhos JSON do cardápio permanecem iguais", () => {

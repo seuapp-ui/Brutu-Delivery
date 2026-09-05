@@ -4,8 +4,8 @@
     "slogan": "O sabor é bruto, a fome não tem chance!",
     "logo": "icons/icon-512.png",
     "bannerTexto": "COMBO ESQUADRÃO · a partir de R$ 63,90",
-    "bannerImagem": "",
-    "bannerImagemAlt": "",
+    "bannerImagem": "img/promo/banner-brutus-premium.webp",
+    "bannerImagemAlt": "Hambúrguer artesanal Brutu's com bacon e cheddar",
     "whatsapp": "5516993319742",
     "pix": {
       "chave": "",
@@ -15,7 +15,7 @@
       "protegido": true
     },
     "taxaEntrega": 5,
-    "pedidoMinimoEntrega": 0,
+    "pedidoMinimoEntrega": 20,
     "tempoEstimado": "40-60 min",
     "enderecoRetirada": "Rua Seis de Janeiro, 806 - Em frente ao Pé na Areia",
     "horario": {
@@ -127,6 +127,16 @@
     {
       "id": "acomp-suco",
       "nome": "Suco Frupic 450ml (uva ou laranja)",
+      "preco": 0
+    },
+    {
+      "id": "acomp-refri-1l",
+      "nome": "Refrigerante 1L (consulte sabores disponíveis)",
+      "preco": 0
+    },
+    {
+      "id": "acomp-refri-2l",
+      "nome": "Refrigerante 2L (consulte sabores disponíveis)",
       "preco": 0
     }
   ],
@@ -292,7 +302,7 @@
       "categoria": "hamburgueres-gourmet",
       "nome": "Brutu's Bacon",
       "descricao": "Pão, hambúrguer, cheddar cremoso, bacon crocante e molho especial.",
-      "foto": "https://placehold.co/600x450/241c17/ffb703?text=Brutus+Bacon",
+      "foto": "img/produtos/brutus-bacon.webp",
       "preco": 30.9,
       "ingredientes": [
         "Pão",
@@ -315,7 +325,7 @@
       "categoria": "hamburgueres-gourmet",
       "nome": "Brutu's Cheddar Duplo",
       "descricao": "Dois hambúrgueres, muito cheddar, cebola caramelizada e bacon.",
-      "foto": "https://placehold.co/600x450/241c17/ffb703?text=Brutus+Cheddar+Duplo",
+      "foto": "img/produtos/brutus-cheddar-duplo.webp",
       "preco": 35.9,
       "ingredientes": [
         "Pão",
@@ -413,7 +423,7 @@
       "categoria": "hamburgueres-gourmet",
       "nome": "Brutu's Raiz",
       "descricao": "Hambúrguer, catupiry, ovo, presunto, alface, tomate e molho da casa.",
-      "foto": "https://placehold.co/600x450/241c17/ffb703?text=Brutus+Raiz",
+      "foto": "img/produtos/brutus-raiz.webp",
       "preco": 35.9,
       "ingredientes": [
         "Pão",
@@ -439,7 +449,7 @@
       "categoria": "hamburgueres-gourmet",
       "nome": "X Burguer Brutus",
       "descricao": "Pão, hambúrguer e queijo.",
-      "foto": "https://placehold.co/600x450/241c17/ffb703?text=X+Burguer",
+      "foto": "img/produtos/x-burguer-brutus.webp",
       "preco": 23.9,
       "ingredientes": [
         "Pão",
@@ -460,7 +470,7 @@
       "categoria": "hamburgueres-gourmet",
       "nome": "BRUTU'S PICKLES",
       "descricao": "Pão macio, hambúrguer artesanal, cheddar cremoso, cebola roxa, picles crocantes e molho especial de picles.",
-      "foto": "https://placehold.co/600x450/241c17/ffb703?text=BRUTUS+PICKLES",
+      "foto": "img/produtos/brutus-pickles.webp",
       "preco": 38.9,
       "ingredientes": [
         "Pão macio",
@@ -507,7 +517,7 @@
       "categoria": "especiais",
       "nome": "Pappy Burger",
       "descricao": "Pão, hambúrguer, fatia de cheddar, bacon, catupiry, alface e tomate.",
-      "foto": "https://placehold.co/600x450/241c17/ffb703?text=Pappy+Burger",
+      "foto": "img/produtos/pappy-burger.webp",
       "preco": 29.99,
       "ingredientes": [
         "Pão",
@@ -563,7 +573,7 @@
       "categoria": "especiais",
       "nome": "Brutus na Chapa",
       "descricao": "Pão, salsicha, bacon, batata palha, molho da casa, ovo, presunto, muçarela, alface e tomate.",
-      "foto": "https://placehold.co/600x450/241c17/ffb703?text=Brutus+na+Chapa",
+      "foto": "img/produtos/brutus-na-chapa.webp",
       "preco": 27,
       "ingredientes": [
         "Pão",
@@ -621,7 +631,7 @@
       "categoria": "especiais",
       "nome": "Bruto Power",
       "descricao": "Pão, hambúrguer, bacon, muçarela, catupiry, cebola roxa, tomate, rúcula e molho da casa.",
-      "foto": "https://placehold.co/600x450/241c17/ffb703?text=Bruto+Power",
+      "foto": "img/produtos/bruto-power.webp",
       "preco": 27.99,
       "ingredientes": [
         "Pão",
@@ -1063,6 +1073,8 @@
         "acomp-suco"
       ],
       "escolhaUnicaTitulo": "Escolha a bebida do combo",
+      "escolhaObrigatoria": true,
+      "escolhaUnicaGlobal": true,
       "destaque": true,
       "lancamento": false
     },
@@ -1079,11 +1091,18 @@
         "1x Refrigerante 1L"
       ],
       "adicionais": [
+        "acomp-refri-1l",
         "add-bacon",
         "add-cheddar",
         "add-ovo",
         "add-hamburguer-extra"
       ],
+      "escolhaUnicaIds": [
+        "acomp-refri-1l"
+      ],
+      "escolhaUnicaTitulo": "Bebida incluída no combo",
+      "escolhaObrigatoria": true,
+      "escolhaUnicaGlobal": true,
       "destaque": true,
       "lancamento": false,
       "qtdLanches": 2
@@ -1101,11 +1120,18 @@
         "1x Refrigerante 2L"
       ],
       "adicionais": [
+        "acomp-refri-2l",
         "add-bacon",
         "add-cheddar",
         "add-ovo",
         "add-hamburguer-extra"
       ],
+      "escolhaUnicaIds": [
+        "acomp-refri-2l"
+      ],
+      "escolhaUnicaTitulo": "Bebida incluída no combo",
+      "escolhaObrigatoria": true,
+      "escolhaUnicaGlobal": true,
       "destaque": true,
       "lancamento": false,
       "qtdLanches": 3
@@ -1216,7 +1242,7 @@
       "categoria": "hamburgueres-gourmet",
       "nome": "Brutus Prime",
       "descricao": "Pão, hambúrguer, muçarela, catupiry, cebola caramelizada, tomate e rúcula.",
-      "foto": "https://placehold.co/600x450/241c17/ffb703?text=Brutus+Prime",
+      "foto": "img/produtos/brutus-prime.webp",
       "preco": 27.99,
       "ingredientes": [
         "Pão",
@@ -1317,44 +1343,229 @@
   ],
   "taxasEntrega": [
     {
+      "id": "alto-da-boa-vista",
+      "nome": "Alto da Boa Vista",
+      "valor": 5
+    },
+    {
+      "id": "area-rural-de-morro-agudo",
+      "nome": "Área Rural de Morro Agudo",
+      "valor": 5
+    },
+    {
       "id": "centro",
       "nome": "Centro",
       "valor": 5
     },
     {
-      "id": "ipe",
-      "nome": "Ipê",
+      "id": "chacaras-coqueiros",
+      "nome": "Chácaras Coqueiros",
       "valor": 5
     },
     {
-      "id": "monte-cristo",
-      "nome": "Monte Cristo",
+      "id": "condominio-lago-azul",
+      "nome": "Condomínio Lago Azul",
+      "valor": 10
+    },
+    {
+      "id": "conjunto-habitacional-antonio-jose-abrahao",
+      "nome": "Conjunto Habitacional Antônio José Abrahão",
       "valor": 5
     },
     {
-      "id": "jardim-da-silveira",
-      "nome": "Jardim da Silveira",
+      "id": "conjunto-habitacional-humberto-theodoro-de-castro",
+      "nome": "Conjunto Habitacional Humberto Theodoro de Castro",
       "valor": 5
     },
     {
-      "id": "sem-terra",
-      "nome": "Sem Terra",
+      "id": "conjunto-habitacional-miguel-fiatikoski",
+      "nome": "Conjunto Habitacional Miguel Fiatikoski",
       "valor": 5
     },
     {
-      "id": "benedetti",
-      "nome": "Benedetti",
-      "valor": 6
+      "id": "desmembramento-vista-alegre",
+      "nome": "Desmembramento Vista Alegre",
+      "valor": 5
     },
     {
-      "id": "morada-do-lago",
-      "nome": "Morada do Lago",
+      "id": "distrito-empresarial-shigeyuki-yamaguchi",
+      "nome": "Distrito Empresarial Shigeyuki Yamaguchi (Paulo Yamaguchi)",
+      "valor": 5
+    },
+    {
+      "id": "estancia-santo-antonio",
+      "nome": "Estância Santo Antônio",
+      "valor": 5
+    },
+    {
+      "id": "jardim-california",
+      "nome": "Jardim Califórnia",
+      "valor": 5
+    },
+    {
+      "id": "jardim-cambui",
+      "nome": "Jardim Cambuí",
+      "valor": 5
+    },
+    {
+      "id": "jardim-canada",
+      "nome": "Jardim Canadá",
+      "valor": 5
+    },
+    {
+      "id": "jardim-das-veredas",
+      "nome": "Jardim das Veredas",
+      "valor": 5
+    },
+    {
+      "id": "jardim-dos-ipes",
+      "nome": "Jardim dos Ipês",
+      "valor": 5
+    },
+    {
+      "id": "jardim-europa",
+      "nome": "Jardim Europa",
+      "valor": 5
+    },
+    {
+      "id": "jardim-marina",
+      "nome": "Jardim Marina",
+      "valor": 5
+    },
+    {
+      "id": "jardim-martins-lourenco",
+      "nome": "Jardim Martins Lourenço",
+      "valor": 5
+    },
+    {
+      "id": "jardim-monte-cristo",
+      "nome": "Jardim Monte Cristo",
+      "valor": 5
+    },
+    {
+      "id": "jardim-morada-do-lago",
+      "nome": "Jardim Morada do Lago",
       "valor": 8
     },
     {
-      "id": "lago-azul",
-      "nome": "Lago Azul",
-      "valor": 10
+      "id": "jardim-morada-do-sol",
+      "nome": "Jardim Morada do Sol",
+      "valor": 5
+    },
+    {
+      "id": "jardim-primavera",
+      "nome": "Jardim Primavera",
+      "valor": 5
+    },
+    {
+      "id": "jardim-regina",
+      "nome": "Jardim Regina",
+      "valor": 5
+    },
+    {
+      "id": "jardim-santa-rita",
+      "nome": "Jardim Santa Rita",
+      "valor": 5
+    },
+    {
+      "id": "jardim-sao-jose",
+      "nome": "Jardim São José",
+      "valor": 5
+    },
+    {
+      "id": "jardim-sao-paulo",
+      "nome": "Jardim São Paulo",
+      "valor": 5
+    },
+    {
+      "id": "jardim-silveira",
+      "nome": "Jardim Silveira",
+      "valor": 5
+    },
+    {
+      "id": "jardim-sul",
+      "nome": "Jardim Sul",
+      "valor": 5
+    },
+    {
+      "id": "jose-benedeti",
+      "nome": "José Benedeti",
+      "valor": 6
+    },
+    {
+      "id": "norberto-jose-ribeiro",
+      "nome": "Norberto José Ribeiro",
+      "valor": 5
+    },
+    {
+      "id": "nosso-teto",
+      "nome": "Nosso Teto",
+      "valor": 5
+    },
+    {
+      "id": "parque-7-de-setembro",
+      "nome": "Parque 7 de Setembro",
+      "valor": 5
+    },
+    {
+      "id": "parque-dom-pedro",
+      "nome": "Parque Dom Pedro",
+      "valor": 5
+    },
+    {
+      "id": "recreio-dos-bandeirantes",
+      "nome": "Recreio dos Bandeirantes",
+      "valor": 5
+    },
+    {
+      "id": "residencial-alfredo-benedetti",
+      "nome": "Residencial Alfredo Benedetti",
+      "valor": 5
+    },
+    {
+      "id": "residencial-cidade-nova",
+      "nome": "Residencial Cidade Nova",
+      "valor": 5
+    },
+    {
+      "id": "residencial-e-comercial-portal-das-palmeiras",
+      "nome": "Residencial e Comercial Portal das Palmeiras",
+      "valor": 5
+    },
+    {
+      "id": "residencial-e-comercial-potreiro",
+      "nome": "Residencial e Comercial Potreiro",
+      "valor": 5
+    },
+    {
+      "id": "residencial-granville",
+      "nome": "Residencial Granville",
+      "valor": 5
+    },
+    {
+      "id": "residencial-sebastiao-muniz",
+      "nome": "Residencial Sebastião Muniz",
+      "valor": 5
+    },
+    {
+      "id": "santo-inacio-dos-vieiras",
+      "nome": "Santo Inácio dos Vieiras",
+      "valor": 5
+    },
+    {
+      "id": "vila-biagio",
+      "nome": "Vila Biagio",
+      "valor": 5
+    },
+    {
+      "id": "vila-garbim",
+      "nome": "Vila Garbim",
+      "valor": 5
+    },
+    {
+      "id": "vila-martins",
+      "nome": "Vila Martins",
+      "valor": 5
     }
   ],
   "cupons": [

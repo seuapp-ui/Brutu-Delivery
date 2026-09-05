@@ -20,6 +20,8 @@ test("banco inicia e importa o cardápio", () => {
   const info = banco.infoDb();
   assert.equal(info.tipo, "sqlite");
   assert.ok(banco.lerMenu().produtos.some((p) => p.id === "g009"));
+  assert.equal(banco.lerMenu().taxasEntrega.length, 45);
+  assert.ok(banco.lerMenu().taxasEntrega.some((taxa) => taxa.id === "alto-da-boa-vista"));
 });
 
 test("pedido pode ser inserido, consultado e atualizado", () => {
@@ -33,6 +35,12 @@ test("pedido pode ser inserido, consultado e atualizado", () => {
 
 test("sessão pode ser criada, validada e revogada", () => {
   const sessao = banco.criarSessao("admin");
+  const { DatabaseSync } = require("node:sqlite");
+  const leitura = new DatabaseSync(process.env.DATABASE_PATH, { readOnly: true });
+  const armazenado = leitura.prepare("SELECT token FROM sessoes LIMIT 1").get().token;
+  leitura.close();
+  assert.notEqual(armazenado, sessao.token);
+  assert.match(armazenado, /^sha256\$[a-f0-9]{64}$/);
   assert.equal(banco.validarSessao(sessao.token).usuario, "admin");
   banco.revogarSessao(sessao.token);
   assert.equal(banco.validarSessao(sessao.token), null);

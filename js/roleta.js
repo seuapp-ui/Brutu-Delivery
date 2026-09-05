@@ -23,6 +23,16 @@
     return ctx.querySelector(sel);
   }
 
+  function escaparHtml(valor) {
+    return String(valor == null ? "" : valor).replace(/[&<>"']/g, (caractere) => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+    })[caractere]);
+  }
+
+  function corSegura(valor, fallback = "#ff5a1f") {
+    return /^#[0-9a-f]{6}$/i.test(String(valor || "")) ? String(valor) : fallback;
+  }
+
   function apiUrl(path) {
     return API_BASE() + path;
   }
@@ -67,7 +77,7 @@
 
   function telefoneSalvo() {
     try {
-      const raw = localStorage.getItem("brutus-cliente:v1");
+      const raw = localStorage.getItem("brutus-delivery:cliente:v1") || localStorage.getItem("brutus-cliente:v1");
       if (!raw) return "";
       const d = JSON.parse(raw);
       return (d.telefone || "").replace(/\D/g, "");
@@ -153,6 +163,13 @@
   }
 
   /* ---------- UI ---------- */
+  function atualizarStatus(mensagem, tipo = "") {
+    const el = $("#roleta-status");
+    if (!el) return;
+    el.textContent = mensagem || "";
+    el.dataset.tipo = tipo;
+  }
+
   function montarRoda(premios) {
     const roda = $("#roleta-roda");
     if (!roda || !premios.length) return;
@@ -162,7 +179,7 @@
       .map((p, i) => {
         const a0 = i * step;
         const a1 = (i + 1) * step;
-        return `${p.cor || "#333"} ${a0}deg ${a1}deg`;
+        return `${corSegura(p.cor, i % 2 ? "#ffb100" : "#ff5a1f")} ${a0}deg ${a1}deg`;
       })
       .join(", ");
     roda.style.background = `conic-gradient(from -90deg, ${grad})`;
@@ -172,7 +189,7 @@
       labels.innerHTML = premios
         .map((p, i) => {
           const mid = -90 + i * step + step / 2;
-          return `<div class="roleta-label" style="--ang:${mid}deg"><span>${p.icone}<br>${p.nome}</span></div>`;
+          return `<div class="roleta-label" style="--ang:${mid}deg"><span>${escaparHtml(p.icone || "🎁")}<br>${escaparHtml(p.nome)}</span></div>`;
         })
         .join("");
     }
@@ -185,8 +202,12 @@
     const btn = $("#roleta-btn-girar");
     if (btn) {
       btn.disabled = state.girando || n < 1 || !state.telefone;
-      btn.textContent = n < 1 ? "Sem giros" : state.girando ? "Girando…" : "Girar!";
+      btn.innerHTML = n < 1
+        ? "Sem giros disponíveis"
+        : state.girando ? "<span aria-hidden=\"true\">✦</span> Girando…" : "<span aria-hidden=\"true\">✦</span> Girar a roleta";
+      btn.setAttribute("aria-busy", String(state.girando));
     }
+    $(".roleta-stage")?.classList.toggle("girando", state.girando);
   }
 
   function renderPremiosLista() {
@@ -211,10 +232,10 @@
           ? new Date(p.expiraEm).toLocaleDateString("pt-BR")
           : "—";
         return `<div class="roleta-premio-card">
-          <span class="rp-icone">${p.icone || "🎁"}</span>
+          <span class="rp-icone">${escaparHtml(p.icone || "🎁")}</span>
           <div class="rp-info">
-            <strong>${p.nome}</strong>
-            <span>Válido até ${exp}</span>
+            <strong>${escaparHtml(p.nome)}</strong>
+            <span>Válido até ${escaparHtml(exp)}</span>
           </div>
         </div>`;
       })
@@ -227,16 +248,19 @@
       state.cliente = null;
       atualizarGirosUI();
       renderPremiosLista();
+      atualizarStatus("Informe seu WhatsApp com DDD para consultar os giros.");
       return;
     }
     try {
       state.cliente = await api(`/api/roleta/cliente/${encodeURIComponent(tel)}`);
       state.erroAcesso = "";
+      atualizarStatus((state.cliente.giros || 0) > 0 ? "Você tem prêmio esperando por você!" : "Complete um pedido para ganhar seu próximo giro.");
     } catch (e) {
       state.cliente = { giros: 0, premiosDisponiveis: [], premios: [] };
       state.erroAcesso = e.status === 403
         ? "Este aparelho será liberado para a roleta depois que um pedido feito nele for marcado como entregue."
         : "Não foi possível consultar seus giros agora.";
+      atualizarStatus(state.erroAcesso, "erro");
     }
     atualizarGirosUI();
     renderPremiosLista();
@@ -257,6 +281,7 @@
     const input = $("#roleta-tel-input");
     if (input && tel) input.value = tel;
     if (tel && tel.length >= 10) carregarCliente(tel);
+    else atualizarStatus("Informe seu WhatsApp para ver seus giros e prêmios.");
   }
 
   function fecharModal() {
@@ -273,8 +298,10 @@
     $("#roleta-win-icone").textContent = premio.icone || "🎁";
     $("#roleta-win-nome").textContent = premio.nome || "Prêmio";
     modal.classList.remove("hidden");
+    atualizarStatus("Prêmio conquistado! Ele já está salvo na sua carteira.", "sucesso");
     playWinSound();
     confetes();
+    if (navigator.vibrate) navigator.vibrate([80, 50, 140]);
   }
 
   async function girar() {
@@ -282,12 +309,14 @@
     const tel =
       ($("#roleta-tel-input")?.value || "").replace(/\D/g, "") || state.telefone;
     if (!tel || tel.length < 10) {
-      alert("Informe seu WhatsApp (com DDD) para girar.");
+      atualizarStatus("Informe seu WhatsApp com DDD antes de girar.", "erro");
+      $("#roleta-tel-input")?.focus();
       return;
     }
     salvarTelefoneLocal(tel);
 
     state.girando = true;
+    atualizarStatus("A roleta está girando… boa sorte!");
     atualizarGirosUI();
     playSpinSound();
 
@@ -309,7 +338,7 @@
 
       const roda = $("#roleta-roda");
       if (roda) {
-        roda.style.transition = "transform 4.2s cubic-bezier(0.12, 0.75, 0.12, 1)";
+        roda.style.transition = "transform 4.2s cubic-bezier(0.08, 0.72, 0.1, 1)";
         roda.style.transform = `rotate(${state.rotacaoAtual}deg)`;
       }
 
@@ -322,7 +351,7 @@
     } catch (e) {
       state.girando = false;
       atualizarGirosUI();
-      alert(e.message || "Não foi possível girar.");
+      atualizarStatus(e.message || "Não foi possível girar agora.", "erro");
     }
   }
 

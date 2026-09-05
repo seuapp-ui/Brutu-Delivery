@@ -14,7 +14,7 @@
    troque o número da versão abaixo.
    ========================================================================= */
 
-const CACHE_VERSION = "brutus-v1.6.2";
+const CACHE_VERSION = "brutus-v1.7.6";
 const STATIC_CACHE = `${CACHE_VERSION}-estatico`;
 const DATA_CACHE = `${CACHE_VERSION}-dados`;
 
@@ -31,7 +31,17 @@ const APP_SHELL = [
   "./icons/icon-512.png",
   "./icons/icon-maskable-192.png",
   "./icons/icon-maskable-512.png",
-  "./icons/og-image.jpg",
+  "./icons/og-image-professional.jpg",
+  "./img/promo/banner-brutus-premium.webp",
+  "./img/produtos/brutus-bacon.webp",
+  "./img/produtos/brutus-cheddar-duplo.webp",
+  "./img/produtos/brutus-raiz.webp",
+  "./img/produtos/x-burguer-brutus.webp",
+  "./img/produtos/brutus-pickles.webp",
+  "./img/produtos/pappy-burger.webp",
+  "./img/produtos/brutus-na-chapa.webp",
+  "./img/produtos/bruto-power.webp",
+  "./img/produtos/brutus-prime.webp",
 ];
 
 const MENU_URL_PATH = "/data/menu.json";

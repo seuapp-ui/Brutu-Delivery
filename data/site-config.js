@@ -10,7 +10,7 @@ window.SITE_CONFIG = {
   // Versão do app — só usada em logs e no aviso de "nova versão disponível"
   // (ver js/app.js, seção PWA). Suba esse número junto com CACHE_VERSION em
   // sw.js sempre que publicar uma atualização de verdade.
-  appVersion: "1.6.2",
+  appVersion: "1.7.6",
 
   // API do mesmo servidor (mantida para compatibilidade com instalações locais).
   apiBase: "",

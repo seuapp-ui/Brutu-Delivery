@@ -32,6 +32,17 @@ test("fluxo HTTP: login, proteção e pedido recalculado", { skip: !dependencias
 
   let resposta = await fetch(base + "/api/pedidos");
   assert.equal(resposta.status, 401);
+  assert.match(resposta.headers.get("cache-control") || "", /no-store/);
+
+  resposta = await fetch(base + "/package.json");
+  assert.equal(resposta.status, 404);
+  resposta = await fetch(base + "/backend/data/auth.json");
+  assert.equal(resposta.status, 404);
+  resposta = await fetch(base + "/");
+  assert.equal(resposta.status, 200);
+  const csp = resposta.headers.get("content-security-policy") || "";
+  assert.match(csp, /script-src 'nonce-/);
+  assert.doesNotMatch(csp, /script-src[^;]*'unsafe-inline'/);
 
   resposta = await fetch(base + "/api/auth/login", {
     method: "POST", headers: { "Content-Type": "application/json" },
@@ -40,6 +51,24 @@ test("fluxo HTTP: login, proteção e pedido recalculado", { skip: !dependencias
   assert.equal(resposta.status, 200);
   const token = (await resposta.json()).token;
   assert.ok(token);
+
+  const menuComSegredo = banco.lerMenu();
+  menuComSegredo.adminToken = "nao-pode-ser-publicado";
+  resposta = await fetch(base + "/api/menu", {
+    method: "PUT",
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify(menuComSegredo),
+  });
+  assert.equal(resposta.status, 400);
+
+  for (let tentativa = 0; tentativa < 8; tentativa++) {
+    resposta = await fetch(base + "/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Forwarded-For": `198.51.100.${tentativa}` },
+      body: JSON.stringify({ usuario: "admin", senha: "errada" }),
+    });
+  }
+  assert.equal(resposta.status, 429);
 
   const menu = banco.lerMenu();
   delete menu.restaurante.horario;

@@ -15,11 +15,11 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="Brutu's Delivery — Cardápio">
 <meta property="og:description" content="Peça pelo cardápio digital do Brutu's Delivery e receba tudo quentinho em casa.">
-<meta property="og:image" content="icons/og-image.jpg">
+<meta property="og:image" content="icons/og-image-professional.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Brutu's Delivery — Cardápio">
 <meta name="twitter:description" content="Peça pelo cardápio digital do Brutu's Delivery e receba tudo quentinho em casa.">
-<meta name="twitter:image" content="icons/og-image.jpg">
+<meta name="twitter:image" content="icons/og-image-professional.jpg">
 
 <!-- PWA -->
 <link rel="manifest" href="manifest.json">
@@ -61,7 +61,8 @@
 <!-- ======================= TELA DE CARREGAMENTO ======================= -->
 <div id="loading-screen" class="loading-screen">
   <div class="selo loading-selo" aria-hidden="true">B</div>
-  <p style="color:var(--text-dim); font-size:14px;">Preparando o cardápio…</p>
+  <strong>Preparando o cardápio</strong>
+  <div class="loading-skeleton" aria-hidden="true"><i></i><i></i><i></i></div>
 </div>
 
 <!-- ======================= APP (preenchido via JS) ======================= -->
@@ -109,6 +110,12 @@
       <img class="hero-banner-promo hidden" id="hero-banner-promo" src="" alt="">
     </div>
 
+    <div class="service-highlights" aria-label="Facilidades do pedido">
+      <div class="service-highlight"><span aria-hidden="true">💬</span><strong>Pedido fácil</strong><small>Direto pelo WhatsApp</small></div>
+      <div class="service-highlight"><span aria-hidden="true">🛵</span><strong>Entrega ou retirada</strong><small>Você escolhe</small></div>
+      <div class="service-highlight"><span aria-hidden="true">🔥</span><strong>Feito na hora</strong><small>Do seu jeito</small></div>
+    </div>
+
     <section class="destaques-section hidden" id="destaques-section">
       <h2 class="section-title"><span class="selo" aria-hidden="true">⭐</span>Destaques</h2>
       <div class="destaques-scroll" id="destaques-scroll"></div>
@@ -119,7 +126,13 @@
     <p id="sem-resultado" class="empty-state hidden">Nenhum produto encontrado para essa busca 🔍</p>
 
     <footer class="app-footer">
-      Brutu's Delivery · Cardápio digital · Peça com facilidade pelo WhatsApp
+      <div class="footer-brand"><span class="selo" aria-hidden="true">B</span><div><strong>Brutu's Delivery</strong><small>O sabor é bruto. A fome não tem chance.</small></div></div>
+      <div class="footer-info">
+        <a id="footer-mapa" href="#" target="_blank" rel="noopener"><span aria-hidden="true">📍</span><span><strong>Retirada</strong><small id="footer-endereco"></small></span></a>
+        <div><span aria-hidden="true">🕐</span><span><strong>Atendimento</strong><small id="footer-horario"></small></span></div>
+        <a id="footer-whatsapp" href="#" target="_blank" rel="noopener"><span aria-hidden="true">💬</span><span><strong>WhatsApp</strong><small id="footer-telefone"></small></span></a>
+      </div>
+      <p>Imagens ilustrativas. Consulte a disponibilidade dos produtos.</p>
     </footer>
   </main>
 
@@ -147,6 +160,7 @@
     <div class="product-modal-body">
       <h2 class="product-modal-title" id="product-modal-title"></h2>
       <p class="product-modal-desc" id="product-modal-desc"></p>
+      <div class="product-modal-meta" id="product-modal-meta"></div>
 
       <div class="info-block" id="product-ingredientes-block">
         <h3>Ingredientes</h3>
@@ -154,7 +168,7 @@
       </div>
 
       <div class="info-block hidden" id="product-adicionais-block">
-        <h3>Adicionais</h3>
+        <h3>Personalize seu pedido</h3>
         <div id="product-adicionais-list"></div>
       </div>
 
@@ -191,9 +205,15 @@
 
     <div id="cart-filled-view">
       <div class="cart-header"><h2 class="cart-title">Sua sacola</h2></div>
+      <div class="checkout-steps" aria-label="Etapas da finalização">
+        <button type="button" class="active" data-checkout-step-target="1"><b>1</b><span>Sacola</span></button><i></i>
+        <button type="button" data-checkout-step-target="2"><b>2</b><span>Seus dados</span></button><i></i>
+        <button type="button" data-checkout-step-target="3"><b>3</b><span>Confirmar</span></button>
+      </div>
       <p id="cart-loja-fechada-aviso" class="loja-fechada-aviso hidden" role="status">
         ⚠️ A loja está fechada no momento. Você pode montar o pedido, mas só poderá enviá-lo quando reabrirmos.
       </p>
+      <section class="checkout-panel" data-checkout-step="1" aria-label="Itens da sacola">
       <div class="cart-items" id="cart-items-list"></div>
 
       <div class="cart-summary">
@@ -202,6 +222,7 @@
         <div class="summary-row hidden" id="cart-desconto-row"><span>Desconto <span id="cart-cupom-label"></span></span><span id="cart-desconto">− R$ 0,00</span></div>
         <div class="summary-row total"><span>Total</span><span class="valor" id="cart-total">R$ 0,00</span></div>
       </div>
+      <div class="minimum-order hidden" id="minimum-order" role="status"></div>
 
       <div class="form-section" style="padding-top:0;">
         <h3>Cupom de desconto</h3>
@@ -220,6 +241,18 @@
         <div id="lista-premios-checkout" class="premios-checkout-lista"></div>
         <p class="roleta-hint" style="margin:8px 0 0;">Apenas 1 prêmio por pedido. Não pode combinar com outro prêmio.</p>
       </div>
+
+      <div class="smart-suggestions hidden" id="smart-suggestions">
+        <div class="smart-suggestions-title"><span>✨ Complete seu pedido</span><small>Sugestões que combinam</small></div>
+        <div class="smart-suggestions-list" id="smart-suggestions-list"></div>
+      </div>
+
+      <div class="checkout-nav checkout-nav-next">
+        <button type="button" class="btn-primary" id="checkout-ir-dados">Continuar para seus dados <span aria-hidden="true">→</span></button>
+      </div>
+      </section>
+
+      <section class="checkout-panel hidden" data-checkout-step="2" aria-label="Dados para finalizar">
 
       <!-- Entrega ou retirada -->
       <div class="form-section">
@@ -319,6 +352,16 @@
         </div>
       </form>
 
+      <div class="checkout-nav">
+        <button type="button" class="btn-secondary" id="checkout-voltar-sacola"><span aria-hidden="true">←</span> Voltar</button>
+        <button type="button" class="btn-primary" id="checkout-ir-revisao">Revisar pedido <span aria-hidden="true">→</span></button>
+      </div>
+      </section>
+
+      <section class="checkout-panel hidden" data-checkout-step="3" aria-label="Revisão do pedido">
+        <div class="checkout-review" id="checkout-review"></div>
+        <button type="button" class="checkout-edit-data" id="checkout-editar-dados">✏️ Editar dados de entrega e pagamento</button>
+
       <div class="finalize-footer">
         <div class="finalize-total">
           <span>Total do pedido</span>
@@ -351,6 +394,7 @@
           Abrir WhatsApp para Enviar Pedido
         </button>
       </div>
+      </section>
     </div>
   </div>
 
@@ -378,41 +422,49 @@
 <div id="roleta-overlay" class="roleta-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="roleta-title">
   <div class="roleta-sheet">
     <button type="button" class="roleta-close" id="roleta-close" aria-label="Fechar">✕</button>
-    <h2 id="roleta-title">Roleta da Sorte</h2>
-    <p class="roleta-sub">Gire e ganhe prêmios exclusivos Brutu's!</p>
+    <header class="roleta-hero">
+      <span class="roleta-eyebrow">Clube Brutu's</span>
+      <h2 id="roleta-title">Roleta da Sorte</h2>
+      <p class="roleta-sub">Sua fome pode valer prêmio. Boa sorte!</p>
+    </header>
 
     <div class="roleta-tel-row">
       <input type="tel" id="roleta-tel-input" class="text-input" placeholder="Seu WhatsApp com DDD" inputmode="tel">
       <button type="button" id="roleta-btn-tel" class="roleta-btn-sec">OK</button>
     </div>
 
-    <div class="roleta-giros">Giros disponíveis: <strong id="roleta-giros-count">0</strong></div>
+    <div class="roleta-giros"><span>Giros disponíveis</span><strong id="roleta-giros-count">0</strong></div>
+    <p class="roleta-status" id="roleta-status" role="status" aria-live="polite"></p>
 
     <div class="roleta-stage">
       <div class="roleta-pointer" aria-hidden="true">▼</div>
       <div class="roleta-roda-wrap">
+        <div class="roleta-luzes" aria-hidden="true"></div>
         <div id="roleta-roda" class="roleta-roda"></div>
         <div id="roleta-labels" class="roleta-labels"></div>
-        <div class="roleta-centro">B</div>
+        <div class="roleta-centro"><span>B</span><small>BRUTU'S</small></div>
       </div>
     </div>
 
-    <button type="button" id="roleta-btn-girar" class="roleta-btn-girar" disabled>Girar!</button>
+    <button type="button" id="roleta-btn-girar" class="roleta-btn-girar" disabled><span aria-hidden="true">✦</span> Girar a roleta</button>
 
-    <h3 class="roleta-meus-titulo">🎁 Meus Prêmios</h3>
-    <div id="roleta-meus-premios" class="roleta-meus-lista"></div>
-    <p class="roleta-hint">1 giro a cada pedido <strong>entregue</strong>. Prêmios valem 7 dias. Use 1 por pedido no checkout.</p>
+    <section class="roleta-carteira">
+      <div class="roleta-meus-header"><h3 class="roleta-meus-titulo">Meus Prêmios</h3><span>🎁</span></div>
+      <div id="roleta-meus-premios" class="roleta-meus-lista"></div>
+      <p class="roleta-hint">Ganhe 1 giro a cada pedido <strong>entregue</strong>. O prêmio vale 7 dias e pode ser usado no checkout.</p>
+    </section>
   </div>
 </div>
 
 <div id="roleta-win-modal" class="roleta-win-modal hidden" role="dialog" aria-modal="true">
   <div class="roleta-win-caixa">
     <div id="roleta-confetti" class="roleta-confetti"></div>
+    <span class="roleta-win-eyebrow">Prêmio desbloqueado</span>
     <div id="roleta-win-icone" class="roleta-win-icone">🎁</div>
     <h3>Parabéns!</h3>
     <p id="roleta-win-nome" class="roleta-win-nome">Prêmio</p>
     <p class="roleta-win-msg">Seu prêmio foi salvo em <strong>Meus Prêmios</strong> e vale por 7 dias.</p>
-    <button type="button" id="roleta-win-depois" class="roleta-btn-girar">Resgatar depois</button>
+    <button type="button" id="roleta-win-depois" class="roleta-btn-girar">Guardar em Meus Prêmios</button>
   </div>
 </div>
 

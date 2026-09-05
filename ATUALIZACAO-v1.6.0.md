@@ -2,6 +2,8 @@
 
 > Revisão v1.6.2: nomes e composição dos combos padronizados, incluindo bacon em todos os X Brutus Clássicos dos combos.
 
+> Versão v1.7.0: redesign profissional do cardápio, com melhor hierarquia visual, cards maiores, layout otimizado para PC e celular e novos destaques de atendimento.
+
 ## Fluxo implementado
 
 Ao finalizar, o cardápio registra o pedido na API online sem aguardar a resposta e abre o WhatsApp normalmente. Se a API falhar, o pedido fica em uma fila local e é reenviado automaticamente quando a conexão voltar. O mesmo ID é reutilizado, evitando duplicação.

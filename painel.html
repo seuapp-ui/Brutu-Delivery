@@ -3935,7 +3935,7 @@ a{ color:inherit; }
       let line = `${Number(i.quantidade) || 1}x ${escaparHtml(i.nome || "Item")}`;
       if (i.observacao) line += `<br><span style="opacity:.85"> - ${escaparHtml(i.observacao)}</span>`;
       return line;
-    }).join("<br>") || (p.produtoPrincipal || "");
+    }).join("<br>") || escaparHtml(p.produtoPrincipal || "");
     const tipo = (p.tipoEntrega || "entrega") === "retirada" ? "retirada" : "entrega";
     const tipoBadge = tipo === "retirada"
       ? `<span class="pi-tipo-badge retirada">🏪 RETIRADA</span>`
