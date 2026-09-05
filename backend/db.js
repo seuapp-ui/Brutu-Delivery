@@ -54,6 +54,7 @@ function abrir() {
   aplicarAtualizacaoCardapio151();
   aplicarAtualizacaoCardapio152();
   aplicarAtualizacaoCardapio153();
+  aplicarAtualizacaoBairros175();
   invalidarCredenciaisLegadas();
   return db;
 }
@@ -133,6 +134,42 @@ function aplicarAtualizacaoCardapio153() {
   try { atual = row ? JSON.parse(row.valor) : null; } catch {}
   if (atual && atual.restaurante) {
     atual.restaurante.enderecoRetirada = "Rua Seis de Janeiro, 806 - Em frente ao Pé na Areia";
+    db.prepare("INSERT OR REPLACE INTO config (chave, valor) VALUES (?, ?)").run("menu", JSON.stringify(atual));
+  }
+  db.prepare("INSERT OR REPLACE INTO meta (chave, valor) VALUES (?, ?)").run(revisao, "1");
+}
+
+function aplicarAtualizacaoBairros175() {
+  const revisao = "catalogo-1.7.5-bairros-morro-agudo";
+  const pronta = db.prepare("SELECT valor FROM meta WHERE chave = ?").get(revisao);
+  if (pronta?.valor === "1") return;
+
+  const seed = lerJsonArquivo(path.join(__dirname, "..", "data", "menu.json"), null);
+  const row = db.prepare("SELECT valor FROM config WHERE chave = ?").get("menu");
+  let atual = null;
+  try { atual = row ? JSON.parse(row.valor) : null; } catch {}
+
+  if (seed && atual && Array.isArray(seed.taxasEntrega)) {
+    const taxasAtuais = Array.isArray(atual.taxasEntrega) ? atual.taxasEntrega : [];
+    const atualPorId = new Map(taxasAtuais.map((taxa) => [String(taxa.id), taxa]));
+    const aliases = {
+      "jardim-dos-ipes": "ipe",
+      "jardim-monte-cristo": "monte-cristo",
+      "jardim-silveira": "jardim-da-silveira",
+      "jose-benedeti": "benedetti",
+      "jardim-morada-do-lago": "morada-do-lago",
+      "condominio-lago-azul": "lago-azul",
+      centro: "centro",
+    };
+
+    atual.taxasEntrega = seed.taxasEntrega.map((novaTaxa) => {
+      const anterior = atualPorId.get(String(novaTaxa.id)) || atualPorId.get(aliases[novaTaxa.id]);
+      const valorAnterior = Number(anterior?.valor);
+      return {
+        ...novaTaxa,
+        valor: Number.isFinite(valorAnterior) ? valorAnterior : novaTaxa.valor,
+      };
+    });
     db.prepare("INSERT OR REPLACE INTO config (chave, valor) VALUES (?, ?)").run("menu", JSON.stringify(atual));
   }
   db.prepare("INSERT OR REPLACE INTO meta (chave, valor) VALUES (?, ?)").run(revisao, "1");
@@ -488,24 +525,29 @@ function limparSessoesExpiradas() {
 function criarSessao(usuario) {
   abrir();
   limparSessoesExpiradas();
-  const crypto = require("crypto");
   const token = crypto.randomBytes(32).toString("hex");
+  const tokenHash = hashTokenSessao(token);
   const agora = Date.now();
   db.prepare(
     "INSERT INTO sessoes (token, usuario, criado_em, expira_em) VALUES (?, ?, ?, ?)"
-  ).run(token, usuario, agora, agora + SESSAO_DURACAO_MS);
+  ).run(tokenHash, usuario, agora, agora + SESSAO_DURACAO_MS);
   return { token, expiraEm: agora + SESSAO_DURACAO_MS };
+}
+
+function hashTokenSessao(token) {
+  return "sha256$" + crypto.createHash("sha256").update(String(token), "utf8").digest("hex");
 }
 
 function validarSessao(token) {
   if (!token) return null;
   abrir();
+  const tokenHash = hashTokenSessao(token);
   const row = db.prepare(
     "SELECT token, usuario, expira_em FROM sessoes WHERE token = ?"
-  ).get(token);
+  ).get(tokenHash);
   if (!row) return null;
   if (row.expira_em < Date.now()) {
-    db.prepare("DELETE FROM sessoes WHERE token = ?").run(token);
+    db.prepare("DELETE FROM sessoes WHERE token = ?").run(tokenHash);
     return null;
   }
   return { usuario: row.usuario, expiraEm: row.expira_em };
@@ -514,7 +556,7 @@ function validarSessao(token) {
 function revogarSessao(token) {
   if (!token) return;
   abrir();
-  db.prepare("DELETE FROM sessoes WHERE token = ?").run(token);
+  db.prepare("DELETE FROM sessoes WHERE token = ?").run(hashTokenSessao(token));
 }
 
 function revogarTodasSessoes() {

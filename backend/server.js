@@ -48,6 +48,12 @@ setInterval(() => executarBackupAutomatico("diario"), 24 * 60 * 60 * 1000).unref
 
 const app = express();
 
+// Render/Railway ficam atrás de um proxy conhecido. Confiar em exatamente um
+// salto permite usar req.ip sem aceitar um X-Forwarded-For inventado pelo cliente.
+if (process.env.NODE_ENV === "production" || process.env.RENDER || process.env.RAILWAY_ENVIRONMENT) {
+  app.set("trust proxy", 1);
+}
+
 /* ---------- origens e headers de segurança ---------- */
 const ORIGEM_PRODUCAO = "https://brutu-s-delivery.onrender.com";
 const origensPermitidas = new Set([
@@ -105,6 +111,11 @@ app.use((req, res, next) => {
   res.setHeader("X-Frame-Options", "DENY");
   res.setHeader("Referrer-Policy", "no-referrer");
   res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=(), payment=(), usb=()");
+  if (req.path.startsWith("/api/") || req.path === "/painel.html") {
+    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+    res.setHeader("Pragma", "no-cache");
+    res.setHeader("Expires", "0");
+  }
   if (req.secure || req.headers["x-forwarded-proto"] === "https") {
     res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
   }
@@ -114,7 +125,7 @@ app.use((req, res, next) => {
   res.setHeader(
     "Content-Security-Policy",
     "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; " +
-    "form-action 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; " +
+    "form-action 'self'; script-src 'self' https://cdnjs.cloudflare.com; " +
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
     "font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; " +
     `connect-src 'self' ${ORIGEM_PRODUCAO}`
@@ -205,6 +216,16 @@ function tokenValido(req) {
   return !!store.validarSessao(token);
 }
 
+function ipCliente(req) {
+  return String(req.ip || req.socket.remoteAddress || "local").slice(0, 80);
+}
+
+function compararSegredo(a, b) {
+  const ha = crypto.createHash("sha256").update(String(a), "utf8").digest();
+  const hb = crypto.createHash("sha256").update(String(b), "utf8").digest();
+  return crypto.timingSafeEqual(ha, hb);
+}
+
 function exigirAuth(req, res, next) {
   if (!tokenValido(req)) {
     return res.status(401).json({ erro: "Não autenticado. Faça login no painel." });
@@ -222,14 +243,14 @@ function loginRateLimit(ip) {
   }
   rec.count += 1;
   loginTentativas.set(ip, rec);
-  return rec.count <= 20; // máx. 20 tentativas / 15 min por IP
+  return rec.count <= 8; // máx. 8 tentativas / 15 min por IP
 }
 
 const limites = new Map();
 function limitar({ janelaMs, max, chave }) {
   return (req, res, next) => {
     const agora = Date.now();
-    const ip = String(req.headers["x-forwarded-for"] || req.socket.remoteAddress || "local").split(",")[0].trim();
+    const ip = ipCliente(req);
     const id = `${chave}:${ip}`;
     let rec = limites.get(id);
     if (!rec || agora - rec.inicio >= janelaMs) rec = { inicio: agora, n: 0 };
@@ -286,14 +307,36 @@ function aplicarPixSeguro(menu) {
   return menu;
 }
 
+const CHAVE_SENSIVEL = /(?:senha|password|passwd|secret|token|credential|api[_-]?key|private[_-]?key)/i;
+
+function sanitizarConfigPublica(valor, profundidade = 0) {
+  if (profundidade > 10) throw erroPedido(400, "Cardápio com estrutura profunda demais.");
+  if (typeof valor === "string") return valor.slice(0, 2000);
+  if (valor === null || typeof valor === "number" || typeof valor === "boolean") return valor;
+  if (Array.isArray(valor)) {
+    if (valor.length > 2000) throw erroPedido(400, "Cardápio excede o limite permitido.");
+    return valor.map((item) => sanitizarConfigPublica(item, profundidade + 1));
+  }
+  if (!valor || typeof valor !== "object" || Object.getPrototypeOf(valor) !== Object.prototype) {
+    throw erroPedido(400, "Cardápio contém dados inválidos.");
+  }
+  const limpo = Object.create(null);
+  for (const [chave, item] of Object.entries(valor)) {
+    if (["__proto__", "prototype", "constructor"].includes(chave) || CHAVE_SENSIVEL.test(chave)) {
+      throw erroPedido(400, `Campo não permitido no cardápio: ${chave}.`);
+    }
+    limpo[chave.slice(0, 120)] = sanitizarConfigPublica(item, profundidade + 1);
+  }
+  return limpo;
+}
+
 function idCurto() {
   return Date.now().toString(36).toUpperCase().slice(-5) + Math.random().toString(36).slice(2, 4).toUpperCase();
 }
 
 /* ---------- AUTH ---------- */
 app.post("/api/auth/login", (req, res) => {
-  const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress || "local";
-  if (!loginRateLimit(String(ip).split(",")[0].trim())) {
+  if (!loginRateLimit(ipCliente(req))) {
     return res.status(429).json({ erro: "Muitas tentativas. Aguarde alguns minutos." });
   }
 
@@ -308,13 +351,17 @@ app.post("/api/auth/login", (req, res) => {
   const senhaRecebida = String(senha || "").trim();
   const usandoSenhaAmbiente = senhaAmbiente.length > 0;
 
+  if (usuarioRecebido.length > 100 || senhaRecebida.length > 256) {
+    return res.status(400).json({ erro: "Credenciais inválidas." });
+  }
+
   let loginOk = false;
   let usuarioLogado = auth.usuario;
 
   if (usandoSenhaAmbiente) {
     loginOk =
-      usuarioRecebido === usuarioAmbiente &&
-      senhaRecebida === senhaAmbiente;
+      compararSegredo(usuarioRecebido, usuarioAmbiente) &&
+      compararSegredo(senhaRecebida, senhaAmbiente);
 
     // Diagnóstico seguro: não registra a senha, apenas informa o motivo da recusa.
     if (!loginOk) {
@@ -410,7 +457,12 @@ app.get("/api/menu", (req, res) => {
 });
 
 app.put("/api/menu", exigirAuth, (req, res) => {
-  const menu = req.body;
+  let menu;
+  try {
+    menu = sanitizarConfigPublica(req.body);
+  } catch (e) {
+    return res.status(e.status || 400).json({ erro: e.message || "JSON de menu inválido." });
+  }
   if (!menu || typeof menu !== "object" || !menu.restaurante || !Array.isArray(menu.produtos) || menu.produtos.length > 1000) {
     return res.status(400).json({ erro: "JSON de menu inválido." });
   }
@@ -557,15 +609,18 @@ function adicionaisOficiais(menu, produto, item) {
     : [Array.isArray(item.adicionaisIds) ? item.adicionaisIds : []];
   const normalizados = [];
   let total = 0;
+  let quantidadeEscolhas = 0;
   for (const grupoRecebido of gruposRecebidos.slice(0, 10)) {
     const ids = [...new Set((Array.isArray(grupoRecebido) ? grupoRecebido : []).map(String))];
     if (ids.filter((id) => escolhaUnica.has(id)).length > 1) {
       throw erroPedido(400, `Escolha inválida de adicionais para ${produto.nome}.`);
     }
+    quantidadeEscolhas += ids.filter((id) => escolhaUnica.has(id)).length;
     const grupo = [];
     for (const id of ids) {
       const adicional = catalogo.get(id);
-      if (!adicional || !permitidos.has(id)) {
+      if (!adicional || !permitidos.has(id) || adicional.disponivel === false ||
+          (adicional.estoque !== undefined && adicional.estoque !== null && adicional.estoque !== "" && Number(adicional.estoque) <= 0)) {
         throw erroPedido(400, `Adicional inválido para ${produto.nome}.`);
       }
       const oficial = { id, nome: String(adicional.nome || "Adicional"), preco: moeda(adicional.preco || 0) };
@@ -573,6 +628,9 @@ function adicionaisOficiais(menu, produto, item) {
       normalizados.push(oficial);
       total += oficial.preco;
     }
+  }
+  if (quantidadeEscolhas > 1 || (produto.escolhaObrigatoria === true && quantidadeEscolhas !== 1)) {
+    throw erroPedido(400, `Escolha obrigatória inválida para ${produto.nome}.`);
   }
   return { adicionais: normalizados, total: moeda(total) };
 }
@@ -594,7 +652,8 @@ function calcularPedidoPublico(body) {
     if (recebido?.premioRoleta === true) continue; // será incluído abaixo após validação
     const produtoId = String(recebido?.produtoId || "").trim();
     const produto = menu.produtos.find((p) => String(p.id) === produtoId);
-    if (!produto || produto.disponivel === false) {
+    if (!produto || produto.disponivel === false ||
+        (produto.estoque !== undefined && produto.estoque !== null && produto.estoque !== "" && Number(produto.estoque) <= 0)) {
       throw erroPedido(400, "Produto inválido ou indisponível no pedido.");
     }
     const quantidade = Math.max(1, Math.min(20, Math.trunc(Number(recebido.quantidade) || 1)));
@@ -613,7 +672,8 @@ function calcularPedidoPublico(body) {
 
   if (premio && premio.tipo === "produto_gratis") {
     const produtoGratis = menu.produtos.find((p) => String(p.id) === String(premio.produtoId));
-    if (!produtoGratis || produtoGratis.disponivel === false) {
+    if (!produtoGratis || produtoGratis.disponivel === false ||
+        (produtoGratis.estoque !== undefined && produtoGratis.estoque !== null && produtoGratis.estoque !== "" && Number(produtoGratis.estoque) <= 0)) {
       throw erroPedido(409, "Produto do prêmio não está disponível.");
     }
     itens.push({
@@ -718,7 +778,7 @@ app.post("/api/pedidos", limitar({ janelaMs: 60 * 1000, max: 12, chave: "pedidos
     id: /^p-[a-z0-9-]{6,80}$/i.test(idCliente)
       ? idCliente
       : "p-" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-    numero: /^[A-Z0-9-]{3,30}$/i.test(text(body.numero, 30)) ? text(body.numero, 30) : idCurto(),
+    numero: /^[A-Z0-9-]{3,30}$/i.test(texto(body.numero, 30)) ? texto(body.numero, 30) : idCurto(),
     ts: Date.now(),
     status: "recebido",
     total: calculo.total,
@@ -966,7 +1026,9 @@ function limparPremiosExpirados(cliente) {
 
 function sortearPremio(premios) {
   const total = premios.reduce((s, p) => s + (Number(p.probabilidade) || 0), 0);
-  let r = Math.random() * total;
+  if (!(total > 0)) return null;
+  const aleatorio = crypto.randomBytes(6).readUIntBE(0, 6) / 0x1000000000000;
+  let r = aleatorio * total;
   for (const p of premios) {
     r -= Number(p.probabilidade) || 0;
     if (r <= 0) return p;
@@ -1029,6 +1091,7 @@ app.post("/api/roleta/girar", limitar({ janelaMs: 60 * 1000, max: 10, chave: "ro
   if (!premiosCfg.length) return res.status(500).json({ erro: "Roleta sem prêmios configurados." });
 
   const sorteado = sortearPremio(premiosCfg);
+  if (!sorteado) return res.status(500).json({ erro: "Probabilidades da roleta inválidas." });
   const validadeDias = Number(cfg.validadeDias) || 7;
   const agora = Date.now();
   const premio = {
@@ -1120,7 +1183,7 @@ function concederGiroPorPedidoEntregue(pedido) {
 app.get("/api/health", (req, res) => {
   res.json({
     ok: true,
-    versao: "1.6.2",
+    versao: "1.7.6",
     ts: Date.now(),
   });
 });
@@ -1146,6 +1209,20 @@ app.post("/api/backups", exigirAuth, (req, res) => {
    pessoa que acessasse a URL diretamente. */
 app.use("/backend", (req, res) => res.status(404).end());
 
+// Evita que código operacional, testes, instaladores e configurações de
+// implantação sejam publicados junto com o cardápio estático.
+app.use((req, res, next) => {
+  const p = req.path.toLowerCase();
+  const bloqueado =
+    p.startsWith("/tests/") ||
+    p.startsWith("/scripts/") ||
+    p.startsWith("/.git") ||
+    /\/(?:package(?:-lock)?\.json|render\.yaml|railway\.(?:json|toml)|procfile)$/i.test(p) ||
+    /\.(?:bat|ps1|vbs|md|docx|db|sqlite|sqlite3|env|pem|key)$/i.test(p);
+  if (bloqueado) return res.status(404).end();
+  next();
+});
+
 /* ---------- não cachear painel administrativo ---------- */
 app.use((req, res, next) => {
   if (
@@ -1164,6 +1241,29 @@ app.use((req, res, next) => {
 app.get(["/painel-de-controle.html", "/painel de controle.html"], (req, res) => {
   res.redirect(302, "/painel.html");
 });
+
+function servirHtmlComNonce(arquivo, connectSrc = "'self'") {
+  return (req, res, next) => {
+    try {
+      const nonce = crypto.randomBytes(18).toString("base64");
+      let html = fs.readFileSync(path.join(ROOT, arquivo), "utf8");
+      html = html.replace(/<script\b/gi, `<script nonce="${nonce}"`);
+      res.setHeader(
+        "Content-Security-Policy",
+        `default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; ` +
+        `form-action 'self'; script-src 'nonce-${nonce}' 'strict-dynamic' 'self' https://cdnjs.cloudflare.com; ` +
+        `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; ` +
+        `img-src 'self' data: blob: https:; connect-src ${connectSrc}`
+      );
+      res.type("html").send(html);
+    } catch (e) {
+      next(e);
+    }
+  };
+}
+
+app.get(["/", "/index.html"], servirHtmlComNonce("index.html", `'self' ${ORIGEM_PRODUCAO}`));
+app.get("/extra/imprimir-pedido.html", servirHtmlComNonce("extra/imprimir-pedido.html"));
 
 app.get("/painel.html", (req, res, next) => {
   try {

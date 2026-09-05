@@ -1,6 +1,6 @@
 {
   "name": "brutus-delivery-api",
-  "version": "1.6.2",
+  "version": "1.7.6",
   "description": "API do Brutu's Delivery (Express + SQLite nativo)",
   "main": "server.js",
   "scripts": {
@@ -13,6 +13,6 @@
   },
   "dependencies": {
     "cors": "^2.8.5",
-    "express": "^4.21.2"
+    "express": "^5.2.1"
   }
 }
