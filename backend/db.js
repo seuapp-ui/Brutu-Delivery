@@ -55,6 +55,7 @@ function abrir() {
   aplicarAtualizacaoCardapio152();
   aplicarAtualizacaoCardapio153();
   aplicarAtualizacaoBairros175();
+  aplicarAtualizacaoBairros176();
   invalidarCredenciaisLegadas();
   return db;
 }
@@ -172,6 +173,30 @@ function aplicarAtualizacaoBairros175() {
     });
     db.prepare("INSERT OR REPLACE INTO config (chave, valor) VALUES (?, ?)").run("menu", JSON.stringify(atual));
   }
+  db.prepare("INSERT OR REPLACE INTO meta (chave, valor) VALUES (?, ?)").run(revisao, "1");
+}
+
+function aplicarAtualizacaoBairros176() {
+  const revisao = "catalogo-1.7.6-taxas-6-reais";
+  const pronta = db.prepare("SELECT valor FROM meta WHERE chave = ?").get(revisao);
+  if (pronta?.valor === "1") return;
+
+  const row = db.prepare("SELECT valor FROM config WHERE chave = ?").get("menu");
+  let atual = null;
+  try { atual = row ? JSON.parse(row.valor) : null; } catch {}
+
+  if (atual && Array.isArray(atual.taxasEntrega)) {
+    const excecoes = new Set(["centro", "jardim-dos-ipes", "ipe", "parque-7-de-setembro"]);
+    atual.taxasEntrega = atual.taxasEntrega.map((taxa) => {
+      const valor = Number(taxa?.valor);
+      if (valor === 5 && !excecoes.has(String(taxa?.id || ""))) {
+        return { ...taxa, valor: 6 };
+      }
+      return taxa;
+    });
+    db.prepare("INSERT OR REPLACE INTO config (chave, valor) VALUES (?, ?)").run("menu", JSON.stringify(atual));
+  }
+
   db.prepare("INSERT OR REPLACE INTO meta (chave, valor) VALUES (?, ?)").run(revisao, "1");
 }
 
